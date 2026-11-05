@@ -27,6 +27,8 @@
       navbar = document.getElementById('navbar');
       actionbar = document.getElementById('actionbar');
       Store.init();
+      var my = Store.myClasses();
+      this.achvClassId = my.length ? my[0].id : null;
       this.stack = Store.state.loggedIn ? [{ name: 'home', params: {} }] : [{ name: 'login', params: {} }];
       this.bind();
       this.render();
@@ -269,6 +271,31 @@
       });
     },
 
+    /* --- 学期成就排行 --- */
+    'switch-achv-class': function () {
+      var list = Store.myClasses();
+      if (list.length <= 1) return;
+      var items = list.map(function (c) {
+        return { label: c.name, icon: 'users' };
+      });
+      var cur = list.map(function (c) { return c.id; }).indexOf(App.achvClassId);
+      UI.actionSheet({ title: '选择班级', items: items }).then(function (i) {
+        if (i === null || i === undefined) return;
+        App.achvClassId = list[i].id;
+        App.refresh();
+      });
+    },
+    'open-achv-all': function () {
+      var classId = App.achvClassId || (Store.myClasses()[0] && Store.myClasses()[0].id);
+      if (!classId) return;
+      var c = Store.klass(classId);
+      var ach = Store.achievementOf(classId);
+      var html =
+        '<div class="achv-sheet__note">每个作业按完成名次计分：第 1 名 3 分，第 2 名 2 分，其余完成者各 1 分</div>' +
+        '<div class="achv-rows">' + H.achievementRows(ach, Store.me().id) + '</div>';
+      UI.sheetHtml({ title: (c ? c.name : '') + ' · 学期成就排行', html: html });
+    },
+
     /* --- 班级详情 --- */
     'switch-tab': function (d) {
       App.top().params.tab = d.tab;
@@ -355,9 +382,17 @@
         if (!r.ok) { UI.toast(r.msg); return; }
         var a = Store.assignment(d.id);
         var late = a.deadline && r.record.completedAt > a.deadline;
-        if (late) UI.toast('已记录（逾期完成）');
-        else if (r.rank && r.rank.rank) UI.toast('已完成 · 当前第 ' + r.rank.rank + ' 名');
-        else UI.toast('已完成');
+
+        /* 小提示：提醒不要为了刷分乱点完成 */
+        var ach = Store.achievementOf(a.classId);
+        var meRow = null;
+        for (var i = 0; i < ach.rows.length; i++) if (ach.rows[i].userId === Store.me().id) meRow = ach.rows[i];
+        var pts = Store.rankPoints(r.rank && r.rank.rank);
+        var sub = late
+          ? '本次逾期完成，不计积分 · 已完成 ' + (meRow ? meRow.done : 0) + ' 项作业'
+          : '本次 +' + pts + ' 分 · 学期成就 ' + (meRow ? meRow.points : 0) + ' 分 · 班级第 ' + (meRow ? meRow.rank : '-') + ' 名';
+        UI.hint('你是一个诚实的小朋友', sub);
+
         App.refresh();
       }, 700);
     },

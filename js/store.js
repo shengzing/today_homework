@@ -5,7 +5,7 @@
 (function (global) {
   'use strict';
 
-  var KEY = 'today_homework_prototype_v5';
+  var KEY = 'today_homework_prototype_v7';
 
   /* ---------------- 工具 ---------------- */
   function mulberry32(a) {
@@ -82,8 +82,8 @@
     }
     /* 班级 B：英语打卡小组（王老师是管理员，我是普通成员） */
     var membersB = [{ id: 'u_t', nickname: '王老师', role: 'owner', joinedAt: atDay(-30, 9, 0) }];
-    for (var j = 0; j < NAMES_B.length - 1; j++) {
-      membersB.push({ id: 'u_b' + j, nickname: NAMES_B[j], joinedAt: atDay(-25 + Math.floor(rnd() * 20), 10, 0) });
+    for (var j = 1; j < NAMES_B.length; j++) {
+      membersB.push({ id: 'u_b' + (j - 1), nickname: NAMES_B[j], joinedAt: atDay(-25 + Math.floor(rnd() * 20), 10, 0) });
     }
     membersB.push({ id: 'u_me', nickname: me.nickname, joinedAt: atDay(-14, 12, 0) });
 
@@ -151,13 +151,13 @@
     for (var t3 = 0; t3 < enTimes.length; t3++) push('a_english', 'u_a' + t3, enTimes[t3][0], enTimes[t3][1]);
     /* 昨日 / 前日 */
     for (var t4 = 0; t4 < 29; t4++) push('a_math_4', 'u_a' + t4, 18 + (t4 % 4), (t4 * 7) % 60, -1);
-    push('a_math_4', 'u_me', 20, 14, -1);
+    push('a_math_4', 'u_me', 18, 3, -1);
     for (var t5 = 0; t5 < 27; t5++) push('a_chinese_4', 'u_a' + t5, 18 + (t5 % 3), (t5 * 11) % 60, -1);
-    push('a_chinese_4', 'u_me', 20, 41, -1);
+    push('a_chinese_4', 'u_me', 18, 5, -1);
     push('a_chinese_4', 'u_a28', 0, 12, 0);      /* 逾期：昨天已截止，今天凌晨补做 */
     push('a_chinese_4', 'u_a29', 0, 35, 0);      /* 逾期 */
     for (var t6 = 0; t6 < 28; t6++) push('a_english_3', 'u_a' + t6, 19 + (t6 % 3), (t6 * 5) % 60, -2);
-    push('a_english_3', 'u_me', 21, 2, -2);
+    push('a_english_3', 'u_me', 18, 4, -2);
     /* 班级 B */
     var bTimes = [[8, 12], [9, 30], [12, 45], [15, 20], [17, 5], [17, 50]];
     for (var t7 = 0; t7 < bTimes.length; t7++) push('a_b12', 'u_b' + t7, bTimes[t7][0], bTimes[t7][1]);
@@ -420,6 +420,45 @@
       this.state.completions.push(rec);
       this.save();
       return { name: pick.nickname, rank: this.rankingOf(assignmentId).normal.length };
+    },
+
+    /* --- 学期成就排行 ---
+       计分规则：每个作业按完成名次给分 —— 第 1 名 3 分，第 2 名 2 分，
+       其余完成者各 1 分；逾期完成不计入排名，记 0 分（完成数仍统计）。 */
+    rankPoints: function (rank) {
+      if (!rank) return 0;
+      return rank === 1 ? 3 : (rank === 2 ? 2 : 1);
+    },
+    achievementOf: function (classId) {
+      var self = this;
+      var list = this.assignmentsOf(classId);
+      var board = {};
+      this.membersOf(classId).forEach(function (m) {
+        board[m.id] = { userId: m.id, name: m.nickname, points: 0, done: 0, overdue: 0, total: list.length };
+      });
+      list.forEach(function (a) {
+        var rk = self.rankingOf(a.id);
+        rk.normal.forEach(function (r) {
+          var row = board[r.userId];
+          if (!row) return;
+          row.points += self.rankPoints(r.rank);
+          row.done += 1;
+        });
+        rk.overdue.forEach(function (r) {
+          var row = board[r.userId];
+          if (!row) return;
+          row.done += 1;
+          row.overdue += 1;
+        });
+      });
+      var rows = Object.keys(board).map(function (k) { return board[k]; });
+      rows.sort(function (x, y) {
+        if (y.points !== x.points) return y.points - x.points;
+        if (y.done !== x.done) return y.done - x.done;
+        return x.userId < y.userId ? -1 : 1;
+      });
+      rows.forEach(function (r, i) { r.rank = i + 1; });
+      return { classId: classId, rows: rows, assignments: list.length };
     },
 
     /* --- 统计 --- */

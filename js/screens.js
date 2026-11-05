@@ -66,6 +66,61 @@
       '</div>';
   }
 
+  /* ---------- 学期成就排行卡片 ---------- */
+  function achievementCard() {
+    var classId = (global.App && App.achvClassId) || Store.myClasses()[0].id;
+    var c = Store.klass(classId);
+    var ach = Store.achievementOf(classId);
+    var rows = ach.rows;
+    var meRow = null;
+    for (var i = 0; i < rows.length; i++) if (rows[i].userId === Store.me().id) meRow = rows[i];
+
+    var podium = rows.slice(0, 3).map(function (r) {
+      var medal = r.rank === 1 ? '🥇' : (r.rank === 2 ? '🥈' : '🥉');
+      return '<div class="achv__p">' +
+        '<div class="achv__medal">' + medal + '</div>' +
+        '<div class="achv__pname">' + esc(r.name) + '</div>' +
+        '<div class="achv__ppts">' + r.points + ' 分</div>' +
+      '</div>';
+    }).join('');
+    for (var p = rows.length; p < 3; p++) podium += '<div class="achv__p achv__p--empty"></div>';
+
+    var multi = Store.myClasses().length > 1;
+
+    return '' +
+      '<div class="achv">' +
+        '<div class="achv__head">' +
+          '<div class="achv__title">学期成就排行</div>' +
+          '<button class="achv__class" data-action="switch-achv-class">' + esc(c ? c.name : '') +
+            (multi ? UI.icon('down', 13) : '') + '</button>' +
+        '</div>' +
+        '<div class="achv__podium">' + podium + '</div>' +
+        '<div class="achv__me">' +
+          '<span class="achv__me-k">我的成绩</span>' +
+          '<span class="achv__me-v">' + (meRow ? meRow.points : 0) + ' 分</span>' +
+          '<span class="achv__me-r">' + (meRow ? '班级第 ' + meRow.rank + ' 名' : '尚未参与') + '</span>' +
+          '<button class="achv__more" data-action="open-achv-all">查看全部' + UI.icon('right', 13) + '</button>' +
+        '</div>' +
+      '</div>';
+  }
+
+  /* 成就榜单行（用于底部弹层） */
+  function achievementRows(ach, meId) {
+    return ach.rows.map(function (r) {
+      var medal = r.rank === 1 ? '🥇' : (r.rank === 2 ? '🥈' : (r.rank === 3 ? '🥉' : r.rank));
+      var sub = '完成 ' + r.done + ' / ' + r.total + ' 项' + (r.overdue ? ' · 逾期 ' + r.overdue + ' 次' : '');
+      return '<div class="achv-row' + (r.userId === meId ? ' is-me' : '') + '">' +
+        '<span class="rank-badge' + (r.rank <= 3 ? ' rank-badge--' + r.rank : '') + '">' + medal + '</span>' +
+        avatar(r.name, 'avatar--sm') +
+        '<div class="achv-row__main">' +
+          '<div class="achv-row__name">' + esc(r.name) + (r.userId === meId ? '<span class="rank-row__me">我</span>' : '') + '</div>' +
+          '<div class="achv-row__sub">' + sub + '</div>' +
+        '</div>' +
+        '<div class="achv-row__pts">' + r.points + ' 分</div>' +
+      '</div>';
+    }).join('');
+  }
+
   /* ==================== 页面 ==================== */
   var Screens = {};
 
@@ -94,8 +149,6 @@
     body: function () {
       var list = Store.myClasses();
       var me = Store.me();
-      var hour = new Date(Store.now()).getHours();
-      var greet = hour < 6 ? '凌晨好' : (hour < 11 ? '早上好' : (hour < 14 ? '中午好' : (hour < 18 ? '下午好' : '晚上好')));
 
       var cards = list.map(function (c) {
         var st = Store.classStats(c.id);
@@ -125,15 +178,7 @@
 
       return '' +
         '<div class="screen screen--fade">' +
-          '<div class="home-head">' +
-            '<div class="home-head__row">' +
-              '<div>' +
-                '<div class="home-head__hi">' + greet + ' 👋</div>' +
-                '<div class="home-head__name">' + esc(me.nickname) + '</div>' +
-              '</div>' +
-              '<button class="home-head__avatar" data-action="open-profile">' + avatar(me.nickname) + '</button>' +
-            '</div>' +
-          '</div>' +
+          (list.length ? achievementCard() : '') +
           '<div class="sec-title sec-title--plain">我的班级<span style="color:var(--ink-300)">' + list.length + '</span></div>' +
           (list.length ? cards :
             '<div class="empty">' +
@@ -453,5 +498,6 @@
   };
 
   global.Screens = Screens;
-  global.H = { avatar: avatar, avatarText: avatarText, ic: ic, pct: pct, assignCard: assignCard, statusOf: statusOf };
+  global.H = { avatar: avatar, avatarText: avatarText, ic: ic, pct: pct, assignCard: assignCard, statusOf: statusOf,
+    achievementCard: achievementCard, achievementRows: achievementRows };
 })(window);

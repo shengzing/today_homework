@@ -146,6 +146,40 @@
     });
   }
 
+  /* ---------------- 卡片式提示（用于「诚实的小朋友」这类正向反馈） ---------------- */
+  function hint(title, sub, duration) {
+    if (!toastHost) toastHost = el('toastHost');
+    toastHost.innerHTML =
+      '<div class="toast toast--card">' +
+        '<div class="toast--card__icon">✓</div>' +
+        '<div class="toast--card__title">' + esc(title) + '</div>' +
+        (sub ? '<div class="toast--card__sub">' + esc(sub) + '</div>' : '') +
+      '</div>';
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      var t = toastHost.querySelector('.toast');
+      if (t) { t.classList.add('is-out'); setTimeout(function () { toastHost.innerHTML = ''; }, 200); }
+    }, duration || 2600);
+  }
+
+  /* ---------------- 自定义内容底部弹层（可滚动） ---------------- */
+  function sheetHtml(opts) {
+    return new Promise(function (resolve) {
+      if (!modalHost) modalHost = el('modalHost');
+      modalHost.innerHTML =
+        '<div class="sheet-mask" data-dismiss="1"></div>' +
+        '<div class="sheet">' +
+        (opts.title ? '<div class="sheet__title">' + esc(opts.title) + '</div>' : '') +
+        '<div class="sheet__scroll">' + (opts.html || '') + '</div>' +
+        '<button class="sheet__item sheet__cancel" data-i="-1">关闭</button>' +
+        '</div>';
+      modalHost.classList.add('is-open');
+      function close() { modalHost.classList.remove('is-open'); modalHost.innerHTML = ''; resolve(true); }
+      modalHost.querySelector('[data-i="-1"]').addEventListener('click', close);
+      modalHost.querySelector('.sheet-mask').addEventListener('click', close);
+    });
+  }
+
   /* ---------------- ActionSheet ---------------- */
   function actionSheet(opts) {
     return new Promise(function (resolve) {
@@ -242,7 +276,8 @@
   }
 
   global.UI = {
-    toast: toast, confirm: confirm, prompt: prompt, formDialog: formDialog, actionSheet: actionSheet,
+    toast: toast, hint: hint, sheetHtml: sheetHtml,
+    confirm: confirm, prompt: prompt, formDialog: formDialog, actionSheet: actionSheet,
     loading: loading, hideLoading: hideLoading,
     icon: icon, pseudoQR: pseudoQR, copy: copy, esc: esc
   };

@@ -341,14 +341,6 @@ a{color:inherit;text-decoration:none;}
 /* ==========================================================================
    首页
    ========================================================================== */
-.home-head{
-  padding:4px 16px 14px;background:#fff;
-}
-.home-head__row{display:flex;align-items:center;justify-content:space-between;}
-.home-head__hi{font-size:13px;color:var(--ink-400);}
-.home-head__name{font-size:22px;font-weight:650;letter-spacing:.01em;margin-top:2px;}
-.home-head__avatar{width:38px;height:38px;border-radius:50%;overflow:hidden;}
-
 .class-card{
   display:block;text-align:left;background:#fff;border-radius:var(--r-xl);
   box-shadow:var(--shadow-1);padding:16px;margin:0 16px 12px;position:relative;
@@ -726,3 +718,74 @@ a{color:inherit;text-decoration:none;}
   border-radius:9px;border:1px solid var(--line-2);outline:none;text-align:left;background:#fff;
 }
 .modal__input--field:focus{border-color:var(--brand);}
+
+
+/* ==========================================================================
+   学期成就排行
+   ========================================================================== */
+.achv{
+  margin:14px 16px 2px;background:#fff;border-radius:var(--r-xl);box-shadow:var(--shadow-1);
+  padding:14px 14px 12px;
+}
+.achv__head{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.achv__title{font-size:15px;font-weight:650;letter-spacing:.01em;}
+.achv__class{
+  display:inline-flex;align-items:center;gap:3px;font-size:12px;color:var(--ink-500);
+  background:var(--fill);height:24px;padding:0 9px;border-radius:12px;max-width:150px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none;
+}
+.achv__class:active{background:var(--line-2);}
+
+.achv__podium{display:flex;gap:8px;margin-top:12px;}
+.achv__p{
+  flex:1;min-width:0;text-align:center;background:#FAFBFC;border:1px solid var(--line);
+  border-radius:var(--r-md);padding:10px 4px 9px;
+}
+.achv__p--empty{background:transparent;border-style:dashed;}
+.achv__medal{font-size:19px;line-height:1;}
+.achv__pname{
+  font-size:12.5px;font-weight:500;margin-top:5px;padding:0 4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.achv__ppts{font-size:11.5px;color:var(--ink-400);margin-top:2px;font-variant-numeric:tabular-nums;}
+
+.achv__me{
+  display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:11px;
+  border-top:1px solid var(--line);font-size:12.5px;
+}
+.achv__me-k{color:var(--ink-400);flex:none;}
+.achv__me-v{font-size:16px;font-weight:650;color:var(--brand-600);flex:none;}
+.achv__me-r{color:var(--ink-500);}
+.achv__more{
+  margin-left:auto;display:inline-flex;align-items:center;gap:2px;flex:none;
+  color:var(--brand-600);font-size:12.5px;font-weight:500;
+}
+.achv__more:active{opacity:.6;}
+
+.achv-sheet__note{
+  padding:10px 16px 12px;font-size:11.5px;color:var(--ink-400);line-height:1.6;
+  background:#fff;border-bottom:1px solid var(--line);
+}
+.achv-row{display:flex;align-items:center;gap:10px;padding:10px 16px;background:#fff;}
+.achv-row + .achv-row{border-top:1px solid var(--line);}
+.achv-row.is-me{background:linear-gradient(90deg,#F1FBF5,#fff);}
+.achv-row__main{flex:1;min-width:0;}
+.achv-row__name{font-size:14px;font-weight:500;display:flex;align-items:center;gap:6px;}
+.achv-row__sub{font-size:11.5px;color:var(--ink-400);margin-top:2px;}
+.achv-row__pts{
+  font-size:15px;font-weight:650;color:var(--brand-600);flex:none;
+  font-variant-numeric:tabular-nums;min-width:42px;text-align:right;
+}
+
+/* 卡片式提示（诚实的小朋友） */
+.toast--card{
+  background:#fff;color:var(--ink-900);padding:18px 24px 16px;border-radius:16px;
+  min-width:214px;max-width:82%;text-align:center;box-shadow:var(--shadow-3);
+}
+.toast--card__icon{
+  width:34px;height:34px;border-radius:50%;background:var(--brand-050);color:var(--brand-600);
+  display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;
+  margin:0 auto 9px;
+}
+.toast--card__title{font-size:15px;font-weight:600;}
+.toast--card__sub{font-size:12px;color:var(--ink-400);margin-top:5px;line-height:1.5;}
