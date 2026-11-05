@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>今日作业 · 微信小程序静态原型</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2307C160'/%3E%3Ctext x='32' y='45' font-size='36' text-anchor='middle' fill='white' font-family='sans-serif'%3E今%3C/text%3E%3C/svg%3E" />
+<link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+
+<div class="stage">
+  <!-- ============ 左侧：流程说明 / 快捷跳转 / 演示工具 ============ -->
+  <aside class="sidebar">
+    <div class="sidebar__scroll">
+
+      <header class="sidebar__head">
+        <div class="sidebar__logo">今</div>
+        <div class="sidebar__ident">
+          <h1 class="sidebar__title">今日作业</h1>
+          <p class="sidebar__sub">微信小程序 · 静态交互原型 v1.0</p>
+        </div>
+      </header>
+
+      <section class="side-block">
+        <h2 class="side-block__title">核心流程</h2>
+        <ol class="flow" id="flowList"></ol>
+      </section>
+
+      <section class="side-block">
+        <h2 class="side-block__title">页面直达</h2>
+        <div class="jump-grid" id="jumpGrid"></div>
+      </section>
+
+      <section class="side-block">
+        <h2 class="side-block__title">演示工具</h2>
+        <div class="dev-tools">
+          <button class="dev-btn" data-dev="simulate-complete">模拟成员完成</button>
+          <button class="dev-btn" data-dev="reset">重置演示数据</button>
+        </div>
+        <p class="side-note">数据保存在浏览器 localStorage；演示服务器时间固定为「今天 19:10」。</p>
+      </section>
+
+      <section class="side-block">
+        <h2 class="side-block__title">设计原则</h2>
+        <ul class="side-list">
+          <li><b>极简</b> — 12 页砍到 7 页；单字段表单降级为弹窗。</li>
+          <li><b>少决策</b> — 截止时间默认当天 24:00，只保留「今天 / 明天 / 后天」三选一。</li>
+          <li><b>透明</b> — 每条作业常驻显示「已完成 x / y」与进度条。</li>
+          <li><b>即时</b> — 点「我已完成」立即写入服务器时间并回报名次。</li>
+          <li><b>不重复</b> — 详情页不重复展示排行榜内容，排名只在排行榜页出现。</li>
+          <li><b>边界</b> — 普通成员看不到发布入口，只能查看与完成。</li>
+        </ul>
+      </section>
+
+      <section class="side-block">
+        <h2 class="side-block__title">已实现的交互</h2>
+        <ul class="side-list side-list--tight">
+          <li>微信授权登录 → 首页</li>
+          <li>创建班级 / 输入邀请码加入（均为弹窗，不占页面）</li>
+          <li>发布作业：标题、内容、截止时间（默认当天 24:00）</li>
+          <li>一键完成（服务端计时 + 名次回显）</li>
+          <li>实时排行榜 / 逾期分组 / 我的排名</li>
+          <li>历史作业按日期归档</li>
+          <li>班级管理：邀请码二维码、改名、移除成员、换码、转让管理员、解散 / 退出</li>
+          <li>表单校验、空状态、Toast / 确认弹窗 / 底部动作面板</li>
+        </ul>
+      </section>
+
+    </div>
+  </aside>
+
+  <!-- ============ 右侧：设备 ============ -->
+  <main class="stage-main">
+    <div class="device">
+      <div class="device__frame">
+        <div class="device__screen">
+
+          <div class="statusbar">
+            <span class="statusbar__time" id="statusTime">19:10</span>
+            <span class="statusbar__icons">
+              <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor" aria-hidden="true"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.6" y="5" width="3" height="6" rx="1"/><rect x="9.2" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.8" y="0" width="3" height="11" rx="1"/></svg>
+              <svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor" aria-hidden="true"><path d="M8 10.2 6.1 8.3a2.7 2.7 0 0 1 3.8 0L8 10.2Zm0-4.4a5.2 5.2 0 0 0-3.7 1.5L2.8 5.8a7.6 7.6 0 0 1 10.4 0l-1.5 1.5A5.2 5.2 0 0 0 8 5.8Zm0-4.4a9.6 9.6 0 0 0-6.8 2.8L-.3 2.7a12 12 0 0 1 16.6 0l-1.5 1.5A9.6 9.6 0 0 0 8 1.4Z"/></svg>
+              <svg width="25" height="12" viewBox="0 0 25 12" fill="none" aria-hidden="true"><rect x=".5" y=".5" width="21" height="11" rx="3.2" stroke="currentColor" opacity=".38"/><rect x="2" y="2" width="15" height="8" rx="2" fill="currentColor"/><path d="M23 4.2v3.6a2 2 0 0 0 0-3.6Z" fill="currentColor" opacity=".38"/></svg>
+            </span>
+          </div>
+
+          <div class="app" id="app">
+            <header class="navbar" id="navbar"></header>
+            <main class="viewport" id="viewport"></main>
+            <footer class="actionbar" id="actionbar"></footer>
+          </div>
+
+          <div class="homebar"></div>
+
+          <div class="toast-host" id="toastHost"></div>
+          <div class="modal-host" id="modalHost"></div>
+          <div class="loading-host" id="loadingHost"></div>
+        </div>
+      </div>
+      <p class="device__caption">375 × 812 · 微信小程序（iOS 导航规范）</p>
+    </div>
+  </main>
+</div>
+
+<script src="js/store.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/screens.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
