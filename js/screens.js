@@ -33,7 +33,6 @@
   function assignCard(a) {
     var total = Store.membersOf(a.classId).length;
     var done = Store.completionsOf(a.id).length;
-    var p = pct(done, total);
     var st = statusOf(a);
     var dl = dlText(a.deadline);
     return '' +
@@ -41,16 +40,12 @@
         '<div class="assign__main">' +
           '<div class="assign__title' + (st.key === 'done' ? ' is-done' : '') + '">' + esc(a.title) + '</div>' +
           '<div class="assign__content">' + esc(a.content) + '</div>' +
-          '<div class="assign__meta">' +
-            '<span>' + F.time(a.createdAt) + '</span>' +
-            (dl ? '<i>·</i><span class="assign__deadline' + (dl.over ? ' is-over' : '') + '">' + ic('clock', 11) + ' ' + esc(dl.text) + '</span>' : '') +
-          '</div>' +
+          (dl ? '<div class="assign__meta">' +
+            '<span class="assign__deadline' + (dl.over ? ' is-over' : '') + '">' + ic('clock', 11) + ' ' + esc(dl.text) + '</span>' +
+          '</div>' : '') +
         '</div>' +
         '<div class="assign__foot">' +
-          '<div class="assign__progress">' +
-            '<div class="assign__count">已完成 <b>' + done + '</b>/' + total + ' 人</div>' +
-            '<div class="progress" style="margin-top:6px"><div class="progress__bar" style="width:' + p + '%"></div></div>' +
-          '</div>' +
+          '<div class="assign__count">已完成 <b>' + done + '</b>/' + total + ' 人</div>' +
           '<div class="assign__state ' + st.btnCls + '">' + st.btn + '</div>' +
         '</div>' +
       '</div>';
@@ -225,23 +220,26 @@
     }
   };
 
-  /* ---------- 4. 发布作业 ---------- */
+  /* ---------- 4. 发布作业 / 修改作业（同一表单） ---------- */
   Screens.publish = {
-    nav: function () { return { title: '发布作业', back: true }; },
+    nav: function (p) { return { title: p.editId ? '修改作业' : '发布作业', back: true }; },
     body: function (p) {
-      var dl = p.deadline || Store.util.endOfDay(0);
-      var label = F.deadlineText(dl, Store.now()).text.replace(' 截止', '');
+      var editing = p.editId ? Store.assignment(p.editId) : null;
+      var title = editing ? editing.title : '';
+      var content = editing ? editing.content : '';
+      var dl = editing ? editing.deadline : (p.deadline || Store.util.endOfDay(0));
+      var label = dl ? F.deadlineText(dl, Store.now()).text.replace(' 截止', '') : '未设置';
       return '' +
         '<div class="screen screen--fade">' +
           '<div class="form">' +
             '<div class="field" id="f_title">' +
-              '<div class="field__label">作业标题 <i>*</i><span class="field__count" id="cnt_title">0/20</span></div>' +
-              '<input class="input" id="inp_title" maxlength="20" placeholder="例如：11月5日数学作业">' +
+              '<div class="field__label">作业标题 <i>*</i><span class="field__count" id="cnt_title">' + title.length + '/20</span></div>' +
+              '<input class="input" id="inp_title" maxlength="20" placeholder="例如：11月5日数学作业" value="' + esc(title) + '">' +
               '<div class="field__err">' + ic('info', 13) + ' 请填写作业标题</div>' +
             '</div>' +
             '<div class="field" id="f_content">' +
-              '<div class="field__label">作业内容 <i>*</i><span class="field__count" id="cnt_content">0/200</span></div>' +
-              '<textarea class="textarea" id="inp_content" maxlength="200" placeholder="写清楚具体任务，例如：完成数学课本第 35 页、第 36 页。"></textarea>' +
+              '<div class="field__label">作业内容 <i>*</i><span class="field__count" id="cnt_content">' + content.length + '/200</span></div>' +
+              '<textarea class="textarea" id="inp_content" maxlength="200" placeholder="写清楚具体任务，例如：完成数学课本第 35 页、第 36 页。">' + esc(content) + '</textarea>' +
               '<div class="field__err">' + ic('info', 13) + ' 请填写作业内容</div>' +
             '</div>' +
             '<div class="field">' +
@@ -252,19 +250,26 @@
               '</button>' +
               '<div class="field__hint">默认当天 24:00 截止，当天完成都算数</div>' +
             '</div>' +
-            '<div style="margin-top:18px;padding:13px 14px;background:#F2FBF6;border-radius:12px;font-size:12.5px;color:#177E4B;line-height:1.6">' +
-              ic('info', 14) + ' 发布后所有班级成员都会收到；成员点击「我已完成」即记录服务器完成时间并进入排行榜。' +
-            '</div>' +
+            (editing
+              ? '<div style="margin-top:18px;padding:13px 14px;background:#FFF9EC;border-radius:12px;font-size:12.5px;color:#9A6B1F;line-height:1.6">' +
+                ic('info', 14) + ' 修改后已产生的完成记录与排名保持不变。' +
+              '</div>'
+              : '<div style="margin-top:18px;padding:13px 14px;background:#F2FBF6;border-radius:12px;font-size:12.5px;color:#177E4B;line-height:1.6">' +
+                ic('info', 14) + ' 发布后所有班级成员都会收到；成员点击「我已完成」即记录服务器完成时间并进入排行榜。' +
+              '</div>') +
           '</div>' +
         '</div>';
     },
-    action: function () { return '<button class="btn btn--primary btn--block" data-action="submit-assignment">发布作业</button>'; }
+    action: function (p) {
+      return '<button class="btn btn--primary btn--block" data-action="submit-assignment">' +
+        (p.editId ? '保存修改' : '发布作业') + '</button>';
+    }
   };
 
-  /* ---------- 5. 作业详情 ---------- */
+  /* ---------- 5. 作业详情（已合并排行榜） ---------- */
   Screens.assignmentDetail = {
     nav: function () {
-      return { title: '作业详情', back: true, right: { html: '<button class="navbar__btn" data-action="assign-more">' + UI.icon('info', 19) + '</button>' } };
+      return { title: '作业详情', back: true, right: { html: '<button class="navbar__btn" data-action="assign-more">' + UI.icon('dots', 17) + '</button>' } };
     },
     body: function (p) {
       var a = Store.assignment(p.id);
@@ -275,7 +280,9 @@
       var dl = dlText(a.deadline);
       var myRec = Store.completionOf(a.id, Store.me().id);
       var myRank = Store.myRank(a.id);
+      var rk = Store.rankingOf(a.id);
       var creator = Store.nickname(a.creatorId);
+      var canManage = Store.canManageAssignment(a.id);
 
       var head = '' +
         '<div class="detail-head">' +
@@ -283,10 +290,11 @@
           '<div class="detail-head__meta">' +
             '<span class="who">' + avatar(creator, 'avatar--sm') + esc(creator) + '</span>' +
             '<span>' + F.date(a.createdAt) + ' ' + F.time(a.createdAt) + ' 发布</span>' +
+            (canManage ? '<button class="detail-head__edit" data-action="edit-assignment" data-id="' + a.id + '">' + UI.icon('edit', 13) + ' 修改</button>' : '') +
           '</div>' +
         '</div>';
 
-      var cards = '' +
+      var info = '' +
         '<div class="detail-body">' +
           '<div class="detail-card">' +
             '<div class="detail-card__label">作业内容</div>' +
@@ -304,17 +312,42 @@
                 : '<span class="tag tag--warn">未完成</span>') +
             '</div></div>' +
           '</div>' +
-          '<div class="detail-card" style="margin-top:12px">' +
-            '<div style="display:flex;align-items:baseline;gap:8px">' +
-              '<div style="font-size:20px;font-weight:650">' + p2 + '%</div>' +
-              '<div style="font-size:12.5px;color:var(--ink-400)">' + done + ' / ' + total + ' 人完成</div>' +
-            '</div>' +
-            '<div class="progress" style="margin:10px 0 12px"><div class="progress__bar" style="width:' + p2 + '%"></div></div>' +
-            '<button class="link-row" data-action="goto-ranking" data-id="' + a.id + '">查看完整排行榜' + UI.icon('right', 14) + '</button>' +
+        '</div>';
+
+      /* 排行榜（原独立页面，已并入详情页） */
+      var rankHead = '' +
+        '<div class="rank-head">' +
+          '<div class="rank-head__l">' +
+            '<div class="rank-head__t">完成排行榜</div>' +
+            '<div class="rank-head__s">' + done + ' / ' + total + ' 人完成</div>' +
+          '</div>' +
+          '<div class="rank-head__r">' +
+            '<div class="rank-head__pct">' + p2 + '%</div>' +
+            (myRank && myRank.rank ? '<div class="rank-head__me">我的第 ' + myRank.rank + ' 名</div>'
+                                   : '<div class="rank-head__me rank-head__me--none">我还没完成</div>') +
           '</div>' +
         '</div>';
 
-      return '<div class="screen screen--fade">' + head + cards + '</div>';
+      var rows = rk.normal.length
+        ? rk.normal.map(function (r) { return rankRow(r, r.userId === Store.me().id); }).join('')
+        : '<div style="padding:26px 0;text-align:center;color:var(--ink-400);font-size:13px">还没有人完成，快来抢第一</div>';
+
+      var overdue = rk.overdue.length
+        ? '<div class="overdue-head">' + ic('clock', 13) + '<b>逾期完成</b><span>' + rk.overdue.length + ' 人</span></div>' +
+          '<div class="rank-list rank-list--inline">' + rk.overdue.map(function (r) { return rankRow(r, r.userId === Store.me().id); }).join('') + '</div>'
+        : '';
+
+      var rank = '' +
+        '<div class="detail-body" id="rankSection">' +
+          '<div class="detail-card detail-card--rank">' +
+            rankHead +
+            '<div class="progress" style="margin:12px 0 4px"><div class="progress__bar" style="width:' + p2 + '%"></div></div>' +
+            '<div class="rank-list rank-list--inline">' + rows + '</div>' +
+            overdue +
+          '</div>' +
+        '</div>';
+
+      return '<div class="screen screen--fade">' + head + info + rank + '</div>';
     },
     action: function (p) {
       var a = Store.assignment(p.id);
@@ -326,64 +359,6 @@
         return '<button class="btn btn--secondary btn--block" data-action="late-complete">已截止，仍要记录完成</button>';
       }
       return '<button class="btn btn--primary btn--block" data-action="do-complete" data-id="' + a.id + '">' + UI.icon('check', 19) + ' 我已完成</button>';
-    }
-  };
-
-  /* ---------- 6. 完成排行榜 ---------- */
-  Screens.ranking = {
-    nav: function () { return { title: '完成排行榜', back: true }; },
-    body: function (p) {
-      var a = Store.assignment(p.id);
-      if (!a) return '<div class="empty"><div class="empty__title">作业不存在</div></div>';
-      var total = Store.membersOf(a.classId).length;
-      var rk = Store.rankingOf(a.id);
-      var done = rk.total;
-      var p2 = pct(done, total);
-      var myRank = Store.myRank(a.id);
-      var R = 34, C = 2 * Math.PI * R;
-
-      var hero = '' +
-        '<div class="rank-hero">' +
-          '<div class="rank-hero__title">' + esc(a.title) + '</div>' +
-          '<div class="rank-hero__row">' +
-            '<div class="rank-hero__ring">' +
-              '<svg width="80" height="80" viewBox="0 0 80 80">' +
-                '<circle cx="40" cy="40" r="' + R + '" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="6"/>' +
-                '<circle cx="40" cy="40" r="' + R + '" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" ' +
-                  'stroke-dasharray="' + (C * p2 / 100).toFixed(1) + ' ' + C.toFixed(1) + '" transform="rotate(-90 40 40)"/>' +
-              '</svg>' +
-              '<div class="rank-hero__ringtxt"><b>' + p2 + '%</b><span>完成率</span></div>' +
-            '</div>' +
-            '<div class="rank-hero__stats">' +
-              '<div class="rank-hero__stat"><b>' + done + '</b><span>/ ' + total + ' 人已完成</span></div>' +
-              '<div class="rank-hero__stat"><b>' + (total - done) + '</b><span>人未完成</span></div>' +
-            '</div>' +
-          '</div>' +
-        '</div>';
-
-      var mine = myRank ?
-        '<div class="my-rank">' +
-          '<span class="rank-badge' + (myRank.rank && myRank.rank <= 3 ? ' rank-badge--' + myRank.rank : '') + '">' +
-            (myRank.rank ? (myRank.rank === 1 ? '🥇' : (myRank.rank === 2 ? '🥈' : (myRank.rank === 3 ? '🥉' : myRank.rank))) : '—') + '</span>' +
-          '<div><div class="my-rank__k">我的排名</div><div class="my-rank__v">' +
-            (myRank.rank ? '第 ' + myRank.rank + ' 名' : '逾期完成') + '</div></div>' +
-          '<div class="my-rank__time">' + F.time(myRank.completedAt) + ' 完成</div>' +
-        '</div>' :
-        '<div class="my-rank" style="border-left-color:var(--ink-300)">' +
-          '<span class="rank-badge">—</span>' +
-          '<div><div class="my-rank__k">我的排名</div><div class="my-rank__v" style="color:var(--ink-400);font-size:15px">还没完成</div></div>' +
-          '<button class="btn btn--ghost btn--sm" data-action="goto-assignment" data-id="' + a.id + '">去完成</button>' +
-        '</div>';
-
-      var list = '<div class="rank-list">' + (rk.normal.length ? rk.normal.map(function (r) {
-        return rankRow(r, r.userId === Store.me().id);
-      }).join('') : '<div style="padding:30px 16px;text-align:center;color:var(--ink-400);font-size:13px">还没有人完成，快来抢第一</div>') + '</div>';
-
-      var overdue = rk.overdue.length ?
-        '<div class="overdue-head">' + ic('clock', 13) + '<b>逾期完成</b><span>' + rk.overdue.length + ' 人（保留记录，不参与正常排名）</span></div>' +
-        '<div class="rank-list">' + rk.overdue.map(function (r) { return rankRow(r, r.userId === Store.me().id); }).join('') + '</div>' : '';
-
-      return '<div class="screen screen--fade">' + hero + mine + list + overdue + '</div>';
     }
   };
 

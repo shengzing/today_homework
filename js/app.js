@@ -141,10 +141,11 @@
       var FLOW = [
         { t: '微信授权登录', s: '仅昵称与头像，直接进入首页' },
         { t: '我的班级（首页）', s: '班级卡片 · 创建 / 加入（弹窗）' },
-        { t: '班级详情', s: '今日作业 / 历史作业 + 完成进度' },
+        { t: '班级详情', s: '今日作业 / 历史作业' },
         { t: '发布作业', s: '标题、内容、截止时间（默认 24:00）' },
-        { t: '作业详情 → 我已完成', s: '写入服务器时间并回报名次' },
-        { t: '完成排行榜', s: '实时名次 · 逾期分组 · 我的排名' },
+        { t: '作业详情 + 排行榜', s: '一屏看完内容、状态与实时排名' },
+        { t: '我已完成', s: '写入服务器时间并回报名次' },
+        { t: '修改 / 删除作业', s: '仅发布者可见' },
         { t: '班级管理', s: '邀请码 / 二维码 / 成员 / 转让 / 解散' }
       ];
       document.getElementById('flowList').innerHTML = FLOW.map(function (f) {
@@ -155,8 +156,7 @@
         { n: 'home', l: '首页', s: '我的班级' },
         { n: 'classDetail', l: '班级详情', s: '管理员视角', p: { id: 'c_classA' } },
         { n: 'publish', l: '发布作业', s: '表单页', p: { id: 'c_classA' } },
-        { n: 'assignmentDetail', l: '作业详情', s: '待完成', p: { id: 'a_math' } },
-        { n: 'ranking', l: '排行榜', s: '实时名次', p: { id: 'a_math' } },
+        { n: 'assignmentDetail', l: '作业详情', s: '含排行榜', p: { id: 'a_math' } },
         { n: 'manage', l: '班级管理', s: '邀请与成员', p: { id: 'c_classA' } }
       ];
       document.getElementById('jumpGrid').innerHTML = JUMPS.map(function (j, i) {
@@ -176,6 +176,18 @@
     }
   };
 
+  /* 回到栈中已存在的目标页；不存在则重建（避免删除后返回键失效） */
+  function goBackTo(name, params) {
+    var prev = App.stack[App.stack.length - 2];
+    if (prev && prev.name === name) {
+      App.stack.pop();
+      App.top().params = params;
+      App.transition = 'back';
+      App.render();
+    } else {
+      App.resetTo(name, params);
+    }
+  }
   function clearErr(input) {
     var f = input.closest('.field');
     if (f) f.classList.remove('is-error');
@@ -266,21 +278,20 @@
     'goto-manage': function (d) { App.go('manage', { id: d.id }); },
     'goto-publish': function (d) { App.go('publish', { id: d.id, deadline: null }); },
     'goto-assignment': function (d) { App.go('assignmentDetail', { id: d.id }); },
-    'goto-ranking': function (d) { App.go('ranking', { id: d.id }); },
     'goto-class': function (d) { App.go('classDetail', { id: d.id, tab: 'today' }); },
 
     /* --- 发布作业 --- */
     'pick-deadline': function () {
-      UI.actionSheet({
-        title: '截止时间',
-        items: [
-          { label: '今天 24:00', icon: 'clock' },
-          { label: '明天 24:00', icon: 'clock' },
-          { label: '后天 24:00', icon: 'clock' }
-        ]
-      }).then(function (i) {
+      var editing = !!App.top().params.editId;
+      var items = [
+        { label: '今天 24:00', icon: 'clock' },
+        { label: '明天 24:00', icon: 'clock' },
+        { label: '后天 24:00', icon: 'clock' }
+      ];
+      if (editing) items.unshift({ label: '不设置截止时间', icon: 'trash' });
+      UI.actionSheet({ title: '截止时间', items: items }).then(function (i) {
         if (i === null || i === undefined) return;
-        App.top().params.deadline = Store.util.endOfDay(i);
+        App.top().params.deadline = editing && i === 0 ? null : Store.util.endOfDay(editing ? i - 1 : i);
         App.refresh();
       });
     },
@@ -291,15 +302,48 @@
       if (!title) { markErr('f_title'); ok = false; }
       if (!content) { markErr('f_content'); ok = false; }
       if (!ok) return;
-      var classId = App.top().params.id;
-      var deadline = App.top().params.deadline || Store.util.endOfDay(0);
-      UI.loading('发布中…');
+
+      var params = App.top().params;
+      var editId = params.editId;
+      var classId = params.id;
+      var deadline = params.editId ? (params.deadline === undefined ? null : params.deadline)
+                                   : (params.deadline || Store.util.endOfDay(0));
+
+      UI.loading(editId ? '保存中…' : '发布中…');
       setTimeout(function () {
         UI.hideLoading();
-        Store.createAssignment(classId, title, content, deadline);
-        UI.toast('作业已发布');
-        App.replace('classDetail', { id: classId, tab: 'today' });
+        if (editId) {
+          Store.updateAssignment(editId, title, content, deadline);
+          UI.toast('已保存修改');
+          goBackTo('assignmentDetail', { id: editId });
+        } else {
+          Store.createAssignment(classId, title, content, deadline);
+          UI.toast('作业已发布');
+          App.replace('classDetail', { id: classId, tab: 'today' });
+        }
       }, 640);
+    },
+
+    /* ---------- 修改 / 删除作业（仅发布者） ---------- */
+    'edit-assignment': function (d) {
+      var a = Store.assignment(d.id);
+      if (!a || !Store.canManageAssignment(d.id)) { UI.toast('只有发布者可以修改作业'); return; }
+      App.go('publish', { id: a.classId, editId: a.id, deadline: a.deadline });
+    },
+    'delete-assignment': function (d) {
+      var a = Store.assignment(d.id);
+      if (!a || !Store.canManageAssignment(d.id)) { UI.toast('只有发布者可以删除作业'); return; }
+      UI.confirm({
+        title: '删除「' + a.title + '」',
+        content: '删除后该作业不再出现在列表和统计中，此前的完成记录也会一并移除，且不可恢复。',
+        confirmText: '删除', danger: true
+      }).then(function (ok) {
+        if (!ok) return;
+        var classId = a.classId;
+        Store.deleteAssignment(d.id);
+        UI.toast('作业已删除');
+        goBackTo('classDetail', { id: classId, tab: 'today' });
+      });
     },
 
     /* --- 完成作业 --- */
@@ -318,7 +362,8 @@
       }, 700);
     },
     'already-done': function () {
-      App.go('ranking', { id: App.top().params.id });
+      var el = document.getElementById('rankSection');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     },
     'late-complete': function () {
       UI.confirm({
@@ -338,15 +383,21 @@
     },
     'assign-more': function () {
       var id = App.top().params.id;
-      UI.actionSheet({
-        title: '作业操作',
-        items: [
-          { label: '复制作业链接', icon: 'copy' },
-          { label: '分享给微信好友', icon: 'share' }
-        ]
-      }).then(function (i) {
-        if (i === 0) UI.copy('today-homework://assignment/' + id);
-        if (i === 1) UI.toast('已唤起分享（原型演示）');
+      var canManage = Store.canManageAssignment(id);
+      var items = [];
+      if (canManage) {
+        items.push({ label: '修改作业', icon: 'edit' });
+        items.push({ label: '删除作业', icon: 'trash', danger: true });
+      }
+      items.push({ label: '复制作业链接', icon: 'copy' });
+      items.push({ label: '分享给微信好友', icon: 'share' });
+      UI.actionSheet({ title: canManage ? '作业管理' : '作业操作', items: items }).then(function (i) {
+        if (i === null || i === undefined) return;
+        if (canManage && i === 0) { Actions['edit-assignment']({ id: id }); return; }
+        if (canManage && i === 1) { Actions['delete-assignment']({ id: id }); return; }
+        var idx = canManage ? i - 2 : i;
+        if (idx === 0) UI.copy('today-homework://assignment/' + id);
+        if (idx === 1) UI.toast('已唤起分享（原型演示）');
       });
     },
 

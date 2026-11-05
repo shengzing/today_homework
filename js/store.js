@@ -5,7 +5,7 @@
 (function (global) {
   'use strict';
 
-  var KEY = 'today_homework_prototype_v4';
+  var KEY = 'today_homework_prototype_v5';
 
   /* ---------------- 工具 ---------------- */
   function mulberry32(a) {
@@ -338,6 +338,22 @@
       this.state.assignments.push(a);
       this.save();
       return a;
+    },
+    /* 修改作业：只改内容，不影响已产生的完成记录 */
+    updateAssignment: function (id, title, content, deadline) {
+      var a = this.assignment(id);
+      if (!a) return null;
+      if (title) a.title = title;
+      if (content !== undefined && content !== null) a.content = content;
+      a.deadline = deadline || null;
+      a.updatedAt = this.now();
+      this.save();
+      return a;
+    },
+    /* 是否为该作业的发布者（MVP 中即班级管理员） */
+    canManageAssignment: function (id) {
+      var a = this.assignment(id);
+      return !!a && a.creatorId === this.state.me.id;
     },
     deleteAssignment: function (id) {
       this.state.assignments = this.state.assignments.filter(function (a) { return a.id !== id; });
