@@ -1,0 +1,15 @@
+{
+  "name": "today-homework",
+  "version": "1.0.0",
+  "description": "今日作业小程序 - 班级作业管理与实时排行",
+  "scripts": {
+    "test": "jest --coverage",
+    "test:backend": "jest --config jest.backend.config.js --coverage",
+    "test:frontend": "jest --config jest.frontend.config.js --coverage",
+    "test:e2e": "miniprogram-automator"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "miniprogram-simulate": "^1.6.2"
+  }
+}

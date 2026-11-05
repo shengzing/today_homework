@@ -1,0 +1,21 @@
+<view class="rank-list" wx:if="{{ranking}}">
+  <view class="rank-section" wx:if="{{ranking.normal && ranking.normal.length}}">
+    <view class="rank-section-title">已完成 ({{ranking.normal.length}})</view>
+    <view class="rank-item {{item.userId === myUserId ? 'is-me' : ''}}" wx:for="{{ranking.normal}}" wx:key="userId">
+      <text class="rank-num">{{item.rank === 1 ? '🥇' : item.rank === 2 ? '🥈' : item.rank === 3 ? '🥉' : item.rank}}</text>
+      <text class="rank-name">{{item.nickname}}</text>
+      <text wx:if="{{item.userId === myUserId}}" class="rank-tag">我</text>
+    </view>
+  </view>
+  <view class="rank-section" wx:if="{{ranking.overdue && ranking.overdue.length}}">
+    <view class="rank-section-title overdue">逾期完成 ({{ranking.overdue.length}})</view>
+    <view class="rank-item {{item.userId === myUserId ? 'is-me' : ''}}" wx:for="{{ranking.overdue}}" wx:key="userId">
+      <text class="rank-num">—</text>
+      <text class="rank-name">{{item.nickname}}</text>
+      <text wx:if="{{item.userId === myUserId}}" class="rank-tag">我</text>
+    </view>
+  </view>
+  <view class="rank-empty" wx:if="{{(!ranking.normal || !ranking.normal.length) && (!ranking.overdue || !ranking.overdue.length)}}">
+    <text>还没有人完成，快去做第一个吧</text>
+  </view>
+</view>

@@ -1,0 +1,19 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/home/home",
+    "pages/class/class",
+    "pages/publish/publish",
+    "pages/detail/detail",
+    "pages/manage/manage"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "今日作业",
+    "backgroundColor": "#F1F3F5",
+    "backgroundTextStyle": "light"
+  },
+  "permission": {},
+  "sitemapLocation": "sitemap.json"
+}

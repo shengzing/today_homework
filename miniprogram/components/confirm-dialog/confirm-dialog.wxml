@@ -1,0 +1,10 @@
+<view class="dialog-mask" wx:if="{{visible}}" bindtap="onCancel">
+  <view class="dialog" catchtap="">
+    <text class="dialog-title">{{title}}</text>
+    <text class="dialog-content">{{content}}</text>
+    <view class="dialog-actions">
+      <view class="dialog-btn cancel" bindtap="onCancel">取消</view>
+      <view class="dialog-btn confirm" bindtap="onConfirm">确认</view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,8 @@
+.ach-list { padding: 0 20rpx; }
+.ach-item { display: flex; align-items: center; padding: 24rpx; background: #fff; border-radius: 16rpx; margin-bottom: 8rpx; }
+.ach-item.is-me { background: #F0F4FF; border: 2rpx solid #4C6FFF; }
+.ach-rank { width: 48rpx; font-size: 32rpx; font-weight: 600; }
+.ach-name { flex: 1; font-size: 28rpx; }
+.ach-points { font-size: 28rpx; color: #FF9500; font-weight: 600; margin-right: 16rpx; }
+.ach-done { font-size: 24rpx; color: #8E8E93; }
+.ach-empty { text-align: center; padding: 80rpx 0; color: #C7C7CC; }

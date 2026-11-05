@@ -1,0 +1,11 @@
+.card { background: #fff; border-radius: 20rpx; padding: 28rpx; margin-bottom: 20rpx; box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04); }
+.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12rpx; }
+.card-title { font-size: 32rpx; font-weight: 600; }
+.card-content { font-size: 26rpx; color: #8E8E93; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 16rpx; }
+.card-deadline { font-size: 24rpx; color: #FF9500; }
+.card-progress { font-size: 24rpx; color: #8E8E93; }
+.chip { padding: 6rpx 20rpx; border-radius: 999rpx; font-size: 24rpx; }
+.chip-todo { background: #4C6FFF; color: #fff; }
+.chip-done { background: #34C759; color: #fff; }
+.chip-expired { background: #E0E0E0; color: #8E8E93; }

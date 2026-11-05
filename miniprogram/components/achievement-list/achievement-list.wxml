@@ -1,0 +1,11 @@
+<view class="ach-list" wx:if="{{data && data.rows && data.rows.length}}">
+  <view class="ach-item {{item.userId === myUserId ? 'is-me' : ''}}" wx:for="{{data.rows}}" wx:key="userId">
+    <text class="ach-rank">{{index + 1}}</text>
+    <text class="ach-name">{{item.nickname}}</text>
+    <text class="ach-points">{{item.points}} 分</text>
+    <text class="ach-done">{{item.done}}/{{item.total}}</text>
+  </view>
+</view>
+<view class="ach-empty" wx:else>
+  <text>暂无成就数据</text>
+</view>

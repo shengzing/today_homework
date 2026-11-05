@@ -1,0 +1,15 @@
+<view class="card" bindtap="onTap">
+  <view class="card-header">
+    <text class="card-title">{{item.title}}</text>
+    <view class="chip chip-{{item.myStatus}}">
+      <text wx:if="{{item.myStatus === 'todo'}}">去完成</text>
+      <text wx:elif="{{item.myStatus === 'done'}}">已完成 ✓</text>
+      <text wx:elif="{{item.myStatus === 'expired'}}">已截止</text>
+    </view>
+  </view>
+  <text class="card-content">{{item.content}}</text>
+  <view class="card-footer">
+    <text wx:if="{{item.deadline}}" class="card-deadline">{{item.deadlineText}}</text>
+    <text class="card-progress">{{item.doneCount}} / {{item.totalCount}} 人完成</text>
+  </view>
+</view>

@@ -1,0 +1,19 @@
+/* 设计 Token */
+.tk-primary { color: #4C6FFF; }
+.tk-success { color: #34C759; }
+.tk-warning { color: #FF9500; }
+.tk-danger { color: #FF3B30; }
+.tk-text-secondary { color: #8E8E93; }
+.tk-text-tertiary { color: #C7C7CC; }
+
+.tk-bg-card { background: #FFFFFF; }
+.tk-bg-page { background: #F1F3F5; }
+
+.tk-radius-sm { border-radius: 12rpx; }
+.tk-radius-md { border-radius: 20rpx; }
+.tk-radius-lg { border-radius: 32rpx; }
+.tk-radius-full { border-radius: 999rpx; }
+
+.tk-shadow {
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}

@@ -1,0 +1,10 @@
+.rank-list { padding: 0 20rpx; }
+.rank-section { margin-bottom: 24rpx; }
+.rank-section-title { font-size: 26rpx; color: #8E8E93; margin-bottom: 12rpx; padding: 0 12rpx; }
+.rank-section-title.overdue { color: #FF9500; }
+.rank-item { display: flex; align-items: center; padding: 20rpx 24rpx; background: #fff; border-radius: 16rpx; margin-bottom: 8rpx; }
+.rank-item.is-me { background: #F0F4FF; border: 2rpx solid #4C6FFF; }
+.rank-num { width: 60rpx; font-size: 32rpx; }
+.rank-name { flex: 1; font-size: 28rpx; }
+.rank-tag { font-size: 22rpx; color: #4C6FFF; background: #E8EDFF; padding: 4rpx 16rpx; border-radius: 999rpx; }
+.rank-empty { text-align: center; padding: 80rpx 0; color: #C7C7CC; }
