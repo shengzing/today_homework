@@ -31,13 +31,15 @@ function call(action, payload = {}, options = {}) {
     if (result.code === '40101') {
       wx.redirectTo({ url: '/pages/login/login' });
     }
-    if (showLoading !== false) wx.showToast({ title: msg, icon: 'none' });
+    // 业务错误统一弹 toast（与 showLoading 无关，用户需要知道为什么失败）
+    wx.showToast({ title: msg, icon: 'none' });
     const err = new Error(msg);
     err.bizCode = result.code;
     throw err;
   }).catch(e => {
     if (showLoading) wx.hideLoading();
     if (e.bizCode) throw e; // 已处理过的业务错误
+    // 网络错误
     wx.showToast({ title: '网络异常', icon: 'none' });
     throw e;
   });

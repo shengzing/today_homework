@@ -2,11 +2,10 @@
  * 云函数统一入口 — action 路由 + 鉴权 + 错误包装
  * 文档引用：后端服务设计 §4.2
  */
-const cloud = require('wx-server-sdk');
 const errcode = require('./utils/errcode');
 const auth = require('./utils/auth');
 
-cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
+// cloud.init 由 utils/db.js 统一调用，此处不重复初始化
 
 const routes = {
   // 用户

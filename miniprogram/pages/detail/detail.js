@@ -2,6 +2,7 @@ const { store } = require('../../utils/store');
 const toast = require('../../utils/toast');
 const { pointsOf } = require('../../utils/config');
 const { deadlineText } = require('../../utils/format');
+const api = require('../../utils/api');
 
 Page({
   data: {
@@ -11,10 +12,11 @@ Page({
     loading: true,
     showMenu: false,
     showConfirmDelete: false,
-    isCreator: false,
-    _watcher: null,
-    _debounceTimer: null
+    isCreator: false
   },
+
+  _watcher: null,
+  _debounceTimer: null,
 
   async onLoad(query) {
     if (!query.assignmentId) {
@@ -40,7 +42,6 @@ Page({
   async loadAll() {
     this.setData({ loading: true });
     try {
-      const api = require('../../utils/api');
       const [detail, ranking] = await Promise.all([
         api.getAssignmentDetail({ assignmentId: this.data.assignmentId }),
         store.loadRanking(this.data.assignmentId)
@@ -75,7 +76,6 @@ Page({
     const { detail } = this.data;
     if (!detail) return;
 
-    // 如果是过期作业，二次确认
     if (detail.myStatus === 'expired') {
       const confirmed = await toast.modal('已截止', '作业已截止，仍要记录完成吗？');
       if (!confirmed) return;
@@ -84,16 +84,12 @@ Page({
     try {
       await store.actions.completeAssignment(this.data.assignmentId);
 
-      // 计算名次与得分
       const ranking = await store.loadRanking(this.data.assignmentId, true);
       const myRank = ranking.myRank;
       const rank = myRank?.rank;
       const points = myRank?.overdue ? 0 : (rank ? pointsOf(rank) : 0);
 
-      // 弹出「诚实的小朋友」提示卡
       toast.honestReminder(rank, points);
-
-      // 重新加载详情
       await this.loadAll();
     } catch (e) {
       console.error('complete error', e);
@@ -101,7 +97,6 @@ Page({
   },
 
   onScrollToRanking() {
-    // 滚动到排行榜区域
     wx.pageScrollTo({ selector: '.ranking-section', smooth: true });
   },
 
@@ -110,14 +105,12 @@ Page({
     if (!detail) return;
 
     if (detail.myCompleted) {
-      // 已完成，点击滚动到排行榜
       this.onScrollToRanking();
     } else {
       this.onComplete();
     }
   },
 
-  // 菜单
   openMenu() { this.setData({ showMenu: true }); },
   closeMenu() { this.setData({ showMenu: false }); },
 
@@ -145,7 +138,6 @@ Page({
 
   onMenuShare() {
     this.setData({ showMenu: false });
-    // 分享由 onShareAppMessage 处理
   },
 
   onMenuCopy() {
@@ -162,12 +154,12 @@ Page({
 
   watchStats() {
     const db = wx.cloud.database();
-    this.data._watcher = db.collection('assignment_stats')
+    this._watcher = db.collection('assignment_stats')
       .doc(this.data.assignmentId)
       .watch({
         onChange: () => {
-          if (this.data._debounceTimer) clearTimeout(this.data._debounceTimer);
-          this.data._debounceTimer = setTimeout(() => {
+          if (this._debounceTimer) clearTimeout(this._debounceTimer);
+          this._debounceTimer = setTimeout(() => {
             this.loadRanking(true);
           }, 300);
         },
@@ -176,13 +168,13 @@ Page({
   },
 
   unwatchStats() {
-    if (this.data._watcher) {
-      this.data._watcher.close();
-      this.data._watcher = null;
+    if (this._watcher) {
+      this._watcher.close();
+      this._watcher = null;
     }
-    if (this.data._debounceTimer) {
-      clearTimeout(this.data._debounceTimer);
-      this.data._debounceTimer = null;
+    if (this._debounceTimer) {
+      clearTimeout(this._debounceTimer);
+      this._debounceTimer = null;
     }
   }
 });

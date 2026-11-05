@@ -4,7 +4,6 @@
  */
 const { db } = require('../utils/db');
 const { bizError, CODES } = require('../utils/errcode');
-const { validate } = require('../utils/validate');
 const { nickname } = require('../utils/validate');
 const { randomAvatarColor } = require('../config');
 

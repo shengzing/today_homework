@@ -1,14 +1,15 @@
 /**
  * 时间文案格式化 — 小程序详细设计 §13.3 format 测试用例
  * 客户端时间仅用于展示文案，排名与状态以服务端为准
+ * 所有显示使用 UTC+8 计算，不依赖手机本地时区
  */
 
-const TZ_OFFSET_MIN = 8 * 60;
+const TZ_OFFSET_MS = 8 * 60 * 60 * 1000;
 
 function _startOfDay(now) {
   const d = now instanceof Date ? now : new Date(now);
-  const shifted = new Date(d.getTime() + TZ_OFFSET_MIN * 60 * 1000);
-  return Date.UTC(shifted.getUTCFullYear(), shifted.getUTCMonth(), shifted.getUTCDate()) - TZ_OFFSET_MIN * 60 * 1000;
+  const shifted = new Date(d.getTime() + TZ_OFFSET_MS);
+  return Date.UTC(shifted.getUTCFullYear(), shifted.getUTCMonth(), shifted.getUTCDate()) - TZ_OFFSET_MS;
 }
 
 function relativeDay(target, now) {
@@ -25,16 +26,17 @@ function relativeDay(target, now) {
 }
 
 function _formatTime(ts) {
-  const d = new Date(ts);
-  const h = String(d.getHours()).padStart(2, '0');
-  const m = String(d.getMinutes()).padStart(2, '0');
+  // 转 UTC+8 后用 getUTCHours/getUTCMinutes 显示
+  const d = new Date(ts + TZ_OFFSET_MS);
+  const h = String(d.getUTCHours()).padStart(2, '0');
+  const m = String(d.getUTCMinutes()).padStart(2, '0');
   return `${h}:${m}`;
 }
 
 function _formatDate(ts) {
-  const d = new Date(ts);
-  const mo = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
+  const d = new Date(ts + TZ_OFFSET_MS);
+  const mo = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(d.getUTCDate()).padStart(2, '0');
   return `${mo}月${day}日`;
 }
 
@@ -45,7 +47,6 @@ function deadlineText(deadline, now) {
   const time = _formatTime(deadline);
 
   if (n.getTime() > deadline) {
-    // 已过期
     if (rel) return `已于 ${rel} ${time} 截止`;
     return `已于 ${_formatDate(deadline)} ${time} 截止`;
   }

@@ -108,28 +108,25 @@ async function getMyClasses(payload = {}, ctx) {
 
   const todayStart = startOfDay(new Date());
 
-  const result = [];
-  for (const cls of classRes.data) {
+  // 并行查询每个班级的统计数据（避免 N*3 串行查询）
+  const result = await Promise.all(classRes.data.map(async cls => {
     const member = memberRes.data.find(m => m.classId === cls._id);
 
-    // 今日作业数
-    const todayAssign = await db.collection('assignments')
-      .where({ classId: cls._id, status: 'published', createdAt: _.gte(todayStart) }).count();
+    const [todayAssign, todayDone, memCount] = await Promise.all([
+      db.collection('assignments')
+        .where({ classId: cls._id, status: 'published', createdAt: _.gte(todayStart) }).count(),
+      db.collection('assignment_completions')
+        .where({ classId: cls._id, completedAt: _.gte(todayStart) }).count(),
+      db.collection('class_members')
+        .where({ classId: cls._id }).count()
+    ]);
+
     const todayCount = todayAssign.total;
-
-    // 今日完成数
-    const todayDone = await db.collection('assignment_completions')
-      .where({ classId: cls._id, completedAt: _.gte(todayStart) }).count();
     const doneCount = todayDone.total;
-
-    // 成员数
-    const memCount = await db.collection('class_members')
-      .where({ classId: cls._id }).count();
-
     const totalPossible = todayCount * memCount.total;
     const todayRate = totalPossible ? Math.round(doneCount / totalPossible * 100) : 0;
 
-    result.push({
+    return {
       classId: cls._id,
       name: cls.name,
       description: cls.description,
@@ -138,8 +135,8 @@ async function getMyClasses(payload = {}, ctx) {
       todayCount,
       todayRate,
       badgeColor: cls.badgeColor || '#FF6B6B'
-    });
-  }
+    };
+  }));
 
   return result;
 }
@@ -150,7 +147,7 @@ async function getMyClasses(payload = {}, ctx) {
  */
 async function getClassDetail(payload = {}, ctx) {
   const classId = id(payload.classId);
-  await requireMember(classId, ctx);
+  const member = await requireMember(classId, ctx);
 
   const res = await db.collection('classes').doc(classId).get();
   if (!res.data || res.data.status === 'dissolved') {
@@ -166,7 +163,7 @@ async function getClassDetail(payload = {}, ctx) {
     name: cls.name,
     description: cls.description,
     ownerId: cls.ownerId,
-    role: (await requireMember(classId, ctx)).role,
+    role: member.role,
     memberCount: memCount.total,
     inviteCode: cls.inviteCode
   };

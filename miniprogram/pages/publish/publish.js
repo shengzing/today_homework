@@ -1,7 +1,7 @@
 const { store } = require('../../utils/store');
 const { validate } = require('../../utils/validate');
 const toast = require('../../utils/toast');
-const { deadlineText } = require('../../utils/format');
+const api = require('../../utils/api');
 
 Page({
   data: {
@@ -49,10 +49,7 @@ Page({
   },
 
   buildDeadlineOptions(currentDeadline) {
-    const { now } = this._getEndOfDay();
     const oneDay = 24 * 60 * 60 * 1000;
-    const tzOffset = 8 * 60 * 60 * 1000;
-
     const todayEnd = this._getEndOfDay().endOfDay;
     const tomorrowEnd = todayEnd + oneDay;
     const dayAfterEnd = todayEnd + 2 * oneDay;
@@ -79,9 +76,6 @@ Page({
 
   async loadAssignment() {
     try {
-      const detail = await store.actions.loadAssignmentDetail?.(this.data.assignmentId);
-      // 通过 api 获取详情
-      const api = require('../../utils/api');
       const res = await api.getAssignmentDetail({ assignmentId: this.data.assignmentId });
       this.setData({
         classId: res.classId,
@@ -137,7 +131,6 @@ Page({
       } else {
         // 编辑模式：deadline 三态
         const payload = { assignmentId: this.data.assignmentId, title: titleVal, content: contentVal };
-        // 当前选择的 deadline 值
         const selectedOption = this.data.deadlineOptions[this.data.deadlineIndex];
         if (selectedOption.label === '不设置') {
           payload.deadline = null; // 显式传 null 清除
@@ -149,7 +142,7 @@ Page({
       }
       setTimeout(() => wx.navigateBack(), 500);
     } catch (e) {
-      // error already toasted
+      // error already toasted by api.js
     } finally {
       this.setData({ submitting: false });
     }

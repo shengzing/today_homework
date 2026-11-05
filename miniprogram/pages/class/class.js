@@ -5,15 +5,16 @@ Page({
   data: {
     classId: '',
     classInfo: null,
-    activeTab: 'today', // today | history | achievement
+    activeTab: 'today',
     todayList: [],
     historyList: [],
     achievement: null,
     loading: true,
-    isOwner: false,
-    _watcher: null,
-    _debounceTimer: null
+    isOwner: false
   },
+
+  _watcher: null,
+  _debounceTimer: null,
 
   async onLoad(query) {
     if (!query.classId) {
@@ -28,7 +29,6 @@ Page({
 
   async onShow() {
     if (this.data.classId && this.data.classInfo) {
-      // 数据过期则刷新
       await this.loadAll(true);
     }
   },
@@ -48,7 +48,6 @@ Page({
         store.loadAssignments(this.data.classId, 'history', force)
       ]);
 
-      // 格式化截止时间文案
       const fmtList = (list) => list.map(a => ({
         ...a,
         deadlineText: a.deadline ? deadlineText(a.deadline) : ''
@@ -62,7 +61,6 @@ Page({
         loading: false
       });
 
-      // 如果当前在成就 Tab，也加载
       if (this.data.activeTab === 'achievement') {
         this.loadAchievement(force);
       }
@@ -101,15 +99,14 @@ Page({
     wx.navigateTo({ url: `/pages/manage/manage?classId=${this.data.classId}` });
   },
 
-  // watch assignment_stats 实时刷新
   watchStats() {
     const db = wx.cloud.database();
-    this.data._watcher = db.collection('assignment_stats')
+    this._watcher = db.collection('assignment_stats')
       .where({ classId: this.data.classId })
       .watch({
-        onChange: (snapshot) => {
-          if (this.data._debounceTimer) clearTimeout(this.data._debounceTimer);
-          this.data._debounceTimer = setTimeout(() => {
+        onChange: () => {
+          if (this._debounceTimer) clearTimeout(this._debounceTimer);
+          this._debounceTimer = setTimeout(() => {
             this.loadAll(true);
           }, 300);
         },
@@ -118,13 +115,13 @@ Page({
   },
 
   unwatchStats() {
-    if (this.data._watcher) {
-      this.data._watcher.close();
-      this.data._watcher = null;
+    if (this._watcher) {
+      this._watcher.close();
+      this._watcher = null;
     }
-    if (this.data._debounceTimer) {
-      clearTimeout(this.data._debounceTimer);
-      this.data._debounceTimer = null;
+    if (this._debounceTimer) {
+      clearTimeout(this._debounceTimer);
+      this._debounceTimer = null;
     }
   }
 });

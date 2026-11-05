@@ -6,7 +6,7 @@ const { db, _ } = require('../utils/db');
 const { bizError, CODES } = require('../utils/errcode');
 const { requireMember, requireOwner, batchGetUsers } = require('../utils/auth');
 const { id, title, content, optionalTimestamp } = require('../utils/validate');
-const { endOfDay } = require('../utils/time');
+const { endOfDay, startOfDay } = require('../utils/time');
 const { PAGE_LIMITS } = require('../config');
 
 /**
@@ -134,7 +134,7 @@ async function getAssignments(payload = {}, ctx) {
   await requireMember(classId, ctx);
 
   const scope = payload.scope === 'history' ? 'history' : 'today';
-  const todayStart = require('../utils/time').startOfDay(new Date());
+  const todayStart = startOfDay(new Date());
 
   let query = { classId, status: 'published' };
   if (scope === 'today') {

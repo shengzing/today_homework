@@ -1,6 +1,7 @@
 /**
  * 表单校验（客户端即时反馈）— 小程序详细设计 §13.3 validate
  * 与后端 config.js 保持同步
+ * 返回空字符串表示通过，非空字符串为错误文案
  */
 const { LIMITS } = require('./config');
 
@@ -43,4 +44,6 @@ function inviteCode(v) {
   return '';
 }
 
-module.exports = { str, title, content, className, classDesc, inviteCode };
+const validate = { str, title, content, className, classDesc, inviteCode };
+
+module.exports = { validate, str, title, content, className, classDesc, inviteCode };

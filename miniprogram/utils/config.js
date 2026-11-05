@@ -18,7 +18,21 @@ const LIMITS = {
 
 const INVITE_LENGTH = 6;
 
+const POINTS = {
+  FIRST: 3,
+  SECOND: 2,
+  OTHER: 1
+};
+
+function pointsOf(rank) {
+  if (!rank || rank <= 0) return 0;
+  if (rank === 1) return POINTS.FIRST;
+  if (rank === 2) return POINTS.SECOND;
+  return POINTS.OTHER;
+}
+
 module.exports = {
   LIMITS,
-  INVITE_LENGTH
+  INVITE_LENGTH,
+  pointsOf
 };
