@@ -1,3 +1,24 @@
-<view class="page-publish">
-  <text>publish 页面</text>
+<view class="publish-page">
+  <view class="form-section">
+    <text class="form-label">作业标题</text>
+    <input class="form-input" placeholder="请输入标题（1-20字）" value="{{form.title}}" bindinput="onTitleInput" maxlength="20" />
+    <text wx:if="{{errors.title}}" class="form-error">{{errors.title}}</text>
+  </view>
+
+  <view class="form-section">
+    <text class="form-label">作业内容</text>
+    <textarea class="form-textarea" placeholder="请输入内容（1-200字）" value="{{form.content}}" bindinput="onContentInput" maxlength="200" />
+    <text wx:if="{{errors.content}}" class="form-error">{{errors.content}}</text>
+  </view>
+
+  <view class="form-section">
+    <text class="form-label">截止时间</text>
+    <picker range="{{deadlineOptions}}" range-key="label" value="{{deadlineIndex}}" bindchange="onDeadlineChange">
+      <view class="picker-value">{{deadlineOptions[deadlineIndex].label}}</view>
+    </picker>
+  </view>
+
+  <view class="submit-btn {{submitting ? 'disabled' : ''}}" bindtap="onSubmit">
+    {{mode === 'create' ? '发布作业' : '保存修改'}}
+  </view>
 </view>

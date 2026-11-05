@@ -1,1 +1,16 @@
-.page-class { padding: 40rpx; }
+.class-page { min-height: 100vh; padding-bottom: 120rpx; }
+.class-header { background: #fff; padding: 28rpx 24rpx; border-radius: 0 0 24rpx 24rpx; box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04); }
+.class-header-top { display: flex; justify-content: space-between; align-items: flex-start; }
+.class-header-info { flex: 1; }
+.class-header-name { font-size: 36rpx; font-weight: 700; }
+.class-header-desc { font-size: 26rpx; color: #8E8E93; display: block; margin-top: 4rpx; }
+.header-btn { padding: 12rpx 28rpx; background: #F1F3F5; border-radius: 999rpx; font-size: 26rpx; color: #4C6FFF; }
+.class-header-meta { font-size: 24rpx; color: #8E8E93; margin-top: 12rpx; }
+
+.tab-bar { display: flex; background: #fff; padding: 0 24rpx; margin-top: 16rpx; }
+.tab-item { flex: 1; text-align: center; padding: 20rpx 0; font-size: 28rpx; color: #8E8E93; position: relative; }
+.tab-item.active { color: #4C6FFF; font-weight: 600; }
+.tab-item.active::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 48rpx; height: 6rpx; background: #4C6FFF; border-radius: 3rpx; }
+
+.tab-content { padding: 24rpx; }
+.fab-btn { position: fixed; right: 32rpx; bottom: 80rpx; width: 100rpx; height: 100rpx; background: #4C6FFF; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 56rpx; box-shadow: 0 8rpx 24rpx rgba(76,111,255,0.3); }

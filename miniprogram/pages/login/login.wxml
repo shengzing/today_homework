@@ -1,3 +1,9 @@
-<view class="page-login">
-  <text>login 页面</text>
+<view class="login-page">
+  <view class="login-logo">📚</view>
+  <view class="login-title">今日作业</view>
+  <view class="login-subtitle">一键完成作业，实时查看排行</view>
+  <button class="login-btn" open-type="getUserProfile" bindtap="onAuthorize" loading="{{loading}}">
+    微信授权登录
+  </button>
+  <view class="login-tip">授权后可创建或加入班级</view>
 </view>

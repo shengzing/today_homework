@@ -1,3 +1,59 @@
-<view class="page-home">
-  <text>home 页面</text>
+<view class="home-page">
+  <view class="home-header">
+    <text class="home-title">我的班级</text>
+  </view>
+
+  <view wx:if="{{!loading && classes.length === 0}}" class="home-empty">
+    <empty-state text="还没有班级，创建或加入一个吧" showAction actionText="创建班级" bind:action="openCreate" />
+  </view>
+
+  <view class="class-list" wx:else>
+    <view class="class-card" wx:for="{{classes}}" wx:key="classId" bindtap="onClassTap" data-id="{{item.classId}}">
+      <view class="class-card-left">
+        <view class="class-badge" style="background:{{item.badgeColor}}">{{item.name[0]}}</view>
+      </view>
+      <view class="class-card-body">
+        <text class="class-name">{{item.name}}</text>
+        <text class="class-desc" wx:if="{{item.description}}">{{item.description}}</text>
+        <view class="class-meta">
+          <text>{{item.memberCount}}人</text>
+          <text wx:if="{{item.todayCount > 0}}"> · 今日{{item.todayCount}}作业</text>
+          <text wx:if="{{item.todayCount > 0}}"> · {{item.todayRate}}%</text>
+        </view>
+      </view>
+      <view class="class-role">{{item.role === 'owner' ? '管理员' : '成员'}}</view>
+    </view>
+  </view>
+
+  <view class="home-actions">
+    <view class="action-btn primary" bindtap="openCreate">创建班级</view>
+    <view class="action-btn secondary" bindtap="openJoin">加入班级</view>
+  </view>
+
+  <!-- 创建班级弹窗 -->
+  <view class="modal-mask" wx:if="{{showCreate}}" bindtap="closeCreate">
+    <view class="modal" catchtap="">
+      <text class="modal-title">创建班级</text>
+      <input class="form-input" placeholder="班级名称（1-20字）" value="{{createForm.name}}" bindinput="onCreateName" maxlength="20" />
+      <text wx:if="{{createErrors.name}}" class="form-error">{{createErrors.name}}</text>
+      <input class="form-input" placeholder="班级简介（选填，0-40字）" value="{{createForm.description}}" bindinput="onCreateDesc" maxlength="40" />
+      <view class="modal-actions">
+        <view class="modal-btn cancel" bindtap="closeCreate">取消</view>
+        <view class="modal-btn confirm" bindtap="onCreateSubmit">创建</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加入班级弹窗 -->
+  <view class="modal-mask" wx:if="{{showJoin}}" bindtap="closeJoin">
+    <view class="modal" catchtap="">
+      <text class="modal-title">加入班级</text>
+      <input class="form-input invite-input" placeholder="输入6位邀请码" value="{{joinForm.code}}" bindinput="onJoinCode" maxlength="6" />
+      <text wx:if="{{joinError}}" class="form-error">{{joinError}}</text>
+      <view class="modal-actions">
+        <view class="modal-btn cancel" bindtap="closeJoin">取消</view>
+        <view class="modal-btn confirm" bindtap="onJoinSubmit">加入</view>
+      </view>
+    </view>
+  </view>
 </view>

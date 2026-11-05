@@ -1,1 +1,9 @@
-.page-publish { padding: 40rpx; }
+.publish-page { padding: 24rpx; }
+.form-section { background: #fff; border-radius: 16rpx; padding: 24rpx; margin-bottom: 16rpx; }
+.form-label { font-size: 26rpx; color: #8E8E93; display: block; margin-bottom: 12rpx; }
+.form-input { font-size: 30rpx; padding: 12rpx 0; border-bottom: 2rpx solid #F1F3F5; }
+.form-textarea { font-size: 30rpx; padding: 12rpx 0; min-height: 200rpx; width: 100%; }
+.form-error { font-size: 24rpx; color: #FF3B30; display: block; margin-top: 8rpx; }
+.picker-value { font-size: 30rpx; padding: 12rpx 0; }
+.submit-btn { background: #4C6FFF; color: #fff; text-align: center; padding: 28rpx 0; border-radius: 999rpx; font-size: 32rpx; margin-top: 32rpx; }
+.submit-btn.disabled { opacity: 0.6; }

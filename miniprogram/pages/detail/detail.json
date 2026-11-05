@@ -1,1 +1,6 @@
-{ "usingComponents": {} }
+{
+  "usingComponents": {
+    "rank-list": "/components/rank-list/rank-list",
+    "confirm-dialog": "/components/confirm-dialog/confirm-dialog"
+  }
+}

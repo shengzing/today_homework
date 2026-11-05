@@ -1,1 +1,22 @@
-.page-detail { padding: 40rpx; }
+.detail-page { padding: 24rpx; min-height: 100vh; }
+.detail-card { background: #fff; border-radius: 20rpx; padding: 28rpx; box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04); }
+.detail-header { display: flex; justify-content: space-between; align-items: flex-start; }
+.detail-title { font-size: 36rpx; font-weight: 700; flex: 1; }
+.detail-menu { width: 60rpx; height: 60rpx; display: flex; align-items: center; justify-content: center; font-size: 40rpx; color: #8E8E93; }
+.detail-content { font-size: 28rpx; color: #3C3C43; display: block; margin: 16rpx 0; line-height: 1.8; }
+.detail-meta { display: flex; justify-content: space-between; align-items: center; padding-top: 16rpx; border-top: 2rpx solid #F1F3F5; }
+.detail-deadline { font-size: 24rpx; color: #FF9500; }
+.detail-progress { font-size: 24rpx; color: #8E8E93; }
+
+.complete-btn-wrap { margin: 24rpx 0; }
+.complete-btn { background: #4C6FFF; color: #fff; text-align: center; padding: 28rpx 0; border-radius: 999rpx; font-size: 32rpx; }
+.complete-btn.done { background: #34C759; }
+
+.ranking-section { margin-top: 16rpx; }
+.section-title { font-size: 32rpx; font-weight: 600; display: block; margin-bottom: 16rpx; }
+
+.menu-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: flex-end; z-index: 999; }
+.menu-sheet { background: #fff; border-radius: 24rpx 24rpx 0 0; width: 100%; padding: 16rpx 0; }
+.menu-item { padding: 28rpx 40rpx; font-size: 30rpx; text-align: center; border-bottom: 2rpx solid #F1F3F5; }
+.menu-item.danger { color: #FF3B30; }
+.menu-item.cancel { border-bottom: none; color: #8E8E93; margin-top: 8rpx; }

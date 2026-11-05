@@ -1,3 +1,97 @@
-<view class="page-manage">
-  <text>manage 页面</text>
+<view class="manage-page" wx:if="{{classInfo}}">
+  <!-- 邀请码 -->
+  <view class="section">
+    <text class="section-title">邀请码</text>
+    <view class="invite-code-box">
+      <text class="invite-code">{{classInfo.inviteCode}}</text>
+      <view class="invite-actions">
+        <view class="invite-btn" bindtap="onCopyCode">复制</view>
+        <view class="invite-btn" wx:if="{{isOwner}}" bindtap="onRegenerateCode">重新生成</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 班级信息 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">班级信息</text>
+      <view class="section-edit" wx:if="{{isOwner}}" bindtap="openEdit">编辑</view>
+    </view>
+    <view class="info-row">
+      <text class="info-label">名称</text>
+      <text class="info-value">{{classInfo.name}}</text>
+    </view>
+    <view class="info-row" wx:if="{{classInfo.description}}">
+      <text class="info-label">简介</text>
+      <text class="info-value">{{classInfo.description}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">成员</text>
+      <text class="info-value">{{classInfo.memberCount}} 人</text>
+    </view>
+  </view>
+
+  <!-- 成员列表 -->
+  <view class="section">
+    <text class="section-title">成员列表</text>
+    <view class="member-item" wx:for="{{members}}" wx:key="userId">
+      <view class="member-avatar" style="background:{{item.avatarColor || '#FF6B6B'}}">{{item.nickname[0]}}</view>
+      <view class="member-info">
+        <text class="member-name">{{item.nickname}}</text>
+        <text class="member-role">{{item.role === 'owner' ? '管理员' : '成员'}}</text>
+      </view>
+      <view wx:if="{{isOwner && item.role !== 'owner'}}" class="member-remove" bindtap="onRemoveMember" data-userid="{{item.userId}}" data-name="{{item.nickname}}">
+        移除
+      </view>
+    </view>
+  </view>
+
+  <!-- 管理操作 -->
+  <view class="section actions-section">
+    <view class="action-row" wx:if="{{isOwner}}" bindtap="openTransfer">
+      <text>转让管理员</text>
+      <text class="arrow">›</text>
+    </view>
+    <view class="action-row danger" wx:if="{{isOwner}}" bindtap="onDissolve">
+      <text>解散班级</text>
+      <text class="arrow">›</text>
+    </view>
+    <view class="action-row" wx:if="{{!isOwner}}" bindtap="onLeave">
+      <text>退出班级</text>
+      <text class="arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 编辑弹窗 -->
+  <view class="modal-mask" wx:if="{{showEdit}}" bindtap="closeEdit">
+    <view class="modal" catchtap="">
+      <text class="modal-title">编辑班级</text>
+      <input class="form-input" placeholder="班级名称" value="{{editForm.name}}" bindinput="onEditName" maxlength="20" />
+      <input class="form-input" placeholder="班级简介" value="{{editForm.description}}" bindinput="onEditDesc" maxlength="40" />
+      <view class="modal-actions">
+        <view class="modal-btn cancel" bindtap="closeEdit">取消</view>
+        <view class="modal-btn confirm" bindtap="onEditSubmit">保存</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 转让弹窗 -->
+  <view class="modal-mask" wx:if="{{showTransfer}}" bindtap="closeTransfer">
+    <view class="modal" catchtap="">
+      <text class="modal-title">选择新管理员</text>
+      <view class="transfer-list">
+        <view class="transfer-item {{transferTarget === item.userId ? 'selected' : ''}}" wx:for="{{members}}" wx:if="{{item.role !== 'owner'}}" wx:key="userId" bindtap="onTransferPick" data-userid="{{item.userId}}">
+          <view class="member-avatar-sm" style="background:{{item.avatarColor || '#FF6B6B'}}">{{item.nickname[0]}}</view>
+          <text>{{item.nickname}}</text>
+        </view>
+      </view>
+      <view class="modal-actions">
+        <view class="modal-btn cancel" bindtap="closeTransfer">取消</view>
+        <view class="modal-btn confirm" bindtap="onTransferConfirm">确认转让</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 解散确认 -->
+  <confirm-dialog visible="{{showConfirmDissolve}}" title="解散班级" content="解散后不可恢复，所有作业和完成记录将被清除。确定吗？" bind:confirm="onConfirmDissolve" bind:cancel="onCancelDissolve" />
 </view>

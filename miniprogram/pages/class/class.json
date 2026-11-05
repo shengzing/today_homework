@@ -1,1 +1,7 @@
-{ "usingComponents": {} }
+{
+  "usingComponents": {
+    "assignment-card": "/components/assignment-card/assignment-card",
+    "achievement-list": "/components/achievement-list/achievement-list",
+    "empty-state": "/components/empty-state/empty-state"
+  }
+}

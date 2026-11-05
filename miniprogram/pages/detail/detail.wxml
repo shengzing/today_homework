@@ -1,3 +1,42 @@
-<view class="page-detail">
-  <text>detail 页面</text>
+<view class="detail-page" wx:if="{{detail}}">
+  <view class="detail-card">
+    <view class="detail-header">
+      <text class="detail-title">{{detail.title}}</text>
+      <view class="detail-menu" bindtap="openMenu">
+        <text>⋯</text>
+      </view>
+    </view>
+    <text class="detail-content">{{detail.content}}</text>
+    <view class="detail-meta">
+      <text wx:if="{{detail.deadlineText}}" class="detail-deadline">{{detail.deadlineText}}</text>
+      <text class="detail-progress">{{detail.doneCount}} / {{detail.totalCount}} 人完成</text>
+    </view>
+  </view>
+
+  <view class="complete-btn-wrap">
+    <view class="complete-btn {{detail.myStatus === 'done' ? 'done' : ''}}" bindtap="onCompleteBtnTap">
+      <text wx:if="{{detail.myStatus === 'todo'}}">去完成</text>
+      <text wx:elif="{{detail.myStatus === 'done'}}">已完成 ✓</text>
+      <text wx:elif="{{detail.myStatus === 'expired'}}">已截止，仍要记录完成</text>
+    </view>
+  </view>
+
+  <view class="ranking-section">
+    <text class="section-title">完成排行</text>
+    <rank-list ranking="{{ranking}}" myUserId="{{user.userId}}" />
+  </view>
+
+  <!-- 作业操作菜单 -->
+  <view class="menu-mask" wx:if="{{showMenu}}" bindtap="closeMenu">
+    <view class="menu-sheet" catchtap="">
+      <view class="menu-item" wx:if="{{isCreator}}" bindtap="onMenuEdit">修改作业</view>
+      <view class="menu-item danger" wx:if="{{isCreator}}" bindtap="onMenuDelete">删除作业</view>
+      <view class="menu-item" bindtap="onMenuCopy">复制作业ID</view>
+      <view class="menu-item" bindtap="onMenuShare">分享作业</view>
+      <view class="menu-item cancel" bindtap="closeMenu">取消</view>
+    </view>
+  </view>
+
+  <!-- 删除确认 -->
+  <confirm-dialog visible="{{showConfirmDelete}}" title="删除作业" content="确定删除此作业吗？历史完成记录将保留。" bind:confirm="onConfirmDelete" bind:cancel="onCancelDelete" />
 </view>

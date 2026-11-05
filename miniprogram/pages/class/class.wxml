@@ -1,3 +1,46 @@
-<view class="page-class">
-  <text>class 页面</text>
+<view class="class-page">
+  <view class="class-header" wx:if="{{classInfo}}">
+    <view class="class-header-top">
+      <view class="class-header-info">
+        <text class="class-header-name">{{classInfo.name}}</text>
+        <text class="class-header-desc" wx:if="{{classInfo.description}}">{{classInfo.description}}</text>
+      </view>
+      <view class="class-header-actions">
+        <view class="header-btn" bindtap="onManage">管理</view>
+      </view>
+    </view>
+    <view class="class-header-meta">
+      <text>{{classInfo.memberCount}} 人</text>
+      <text wx:if="{{isOwner}}"> · 管理员</text>
+    </view>
+  </view>
+
+  <view class="tab-bar">
+    <view class="tab-item {{activeTab === 'today' ? 'active' : ''}}" bindtap="onTabChange" data-tab="today">今日作业</view>
+    <view class="tab-item {{activeTab === 'history' ? 'active' : ''}}" bindtap="onTabChange" data-tab="history">历史作业</view>
+    <view class="tab-item {{activeTab === 'achievement' ? 'active' : ''}}" bindtap="onTabChange" data-tab="achievement">学期成就</view>
+  </view>
+
+  <view class="tab-content">
+    <!-- 今日作业 -->
+    <view wx:if="{{activeTab === 'today'}}">
+      <empty-state wx:if="{{todayList.length === 0}}" text="今日还没有作业" />
+      <assignment-card wx:for="{{todayList}}" wx:key="assignmentId" item="{{item}}" bind:tap="onAssignmentTap" />
+    </view>
+
+    <!-- 历史作业 -->
+    <view wx:if="{{activeTab === 'history'}}">
+      <empty-state wx:if="{{historyList.length === 0}}" text="暂无历史作业" />
+      <assignment-card wx:for="{{historyList}}" wx:key="assignmentId" item="{{item}}" bind:tap="onAssignmentTap" />
+    </view>
+
+    <!-- 学期成就 -->
+    <view wx:if="{{activeTab === 'achievement'}}">
+      <achievement-list data="{{achievement}}" myUserId="{{user.userId}}" />
+    </view>
+  </view>
+
+  <view class="fab-btn" wx:if="{{isOwner}}" bindtap="onPublish">
+    <text>+</text>
+  </view>
 </view>
