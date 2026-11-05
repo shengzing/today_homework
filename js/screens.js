@@ -66,42 +66,23 @@
       '</div>';
   }
 
-  /* ---------- 学期成就排行卡片 ---------- */
-  function achievementCard() {
-    var classId = (global.App && App.achvClassId) || Store.myClasses()[0].id;
-    var c = Store.klass(classId);
+  /* ---------- 学期成就排行面板（班级详情页内） ---------- */
+  function achievementPanel(classId) {
     var ach = Store.achievementOf(classId);
-    var rows = ach.rows;
     var meRow = null;
-    for (var i = 0; i < rows.length; i++) if (rows[i].userId === Store.me().id) meRow = rows[i];
-
-    var podium = rows.slice(0, 3).map(function (r) {
-      var medal = r.rank === 1 ? '🥇' : (r.rank === 2 ? '🥈' : '🥉');
-      return '<div class="achv__p">' +
-        '<div class="achv__medal">' + medal + '</div>' +
-        '<div class="achv__pname">' + esc(r.name) + '</div>' +
-        '<div class="achv__ppts">' + r.points + ' 分</div>' +
-      '</div>';
-    }).join('');
-    for (var p = rows.length; p < 3; p++) podium += '<div class="achv__p achv__p--empty"></div>';
-
-    var multi = Store.myClasses().length > 1;
+    for (var i = 0; i < ach.rows.length; i++) if (ach.rows[i].userId === Store.me().id) meRow = ach.rows[i];
 
     return '' +
-      '<div class="achv">' +
-        '<div class="achv__head">' +
-          '<div class="achv__title">学期成就排行</div>' +
-          '<button class="achv__class" data-action="switch-achv-class">' + esc(c ? c.name : '') +
-            (multi ? UI.icon('down', 13) : '') + '</button>' +
+      '<div class="sec-title sec-title--plain">学期成就排行</div>' +
+      '<div class="card" style="margin:0 16px">' +
+        '<div class="achv-hero">' +
+          '<div class="achv-hero__k">我的成绩</div>' +
+          '<div class="achv-hero__v">' + (meRow ? meRow.points : 0) + ' 分</div>' +
+          '<div class="achv-hero__r">' + (meRow ? '班级第 ' + meRow.rank + ' 名 / 共 ' + ach.rows.length + ' 人' : '尚未参与') + '</div>' +
         '</div>' +
-        '<div class="achv__podium">' + podium + '</div>' +
-        '<div class="achv__me">' +
-          '<span class="achv__me-k">我的成绩</span>' +
-          '<span class="achv__me-v">' + (meRow ? meRow.points : 0) + ' 分</span>' +
-          '<span class="achv__me-r">' + (meRow ? '班级第 ' + meRow.rank + ' 名' : '尚未参与') + '</span>' +
-          '<button class="achv__more" data-action="open-achv-all">查看全部' + UI.icon('right', 13) + '</button>' +
-        '</div>' +
-      '</div>';
+        '<div class="achv-rows">' + achievementRows(ach, Store.me().id) + '</div>' +
+      '</div>' +
+      '<div class="achv-note">每个作业按完成名次计分：第 1 名 3 分，第 2 名 2 分，其余完成者各 1 分；逾期完成不计分</div>';
   }
 
   /* 成就榜单行（用于底部弹层） */
@@ -149,6 +130,8 @@
     body: function () {
       var list = Store.myClasses();
       var me = Store.me();
+      var hour = new Date(Store.now()).getHours();
+      var greet = hour < 6 ? '凌晨好' : (hour < 11 ? '早上好' : (hour < 14 ? '中午好' : (hour < 18 ? '下午好' : '晚上好')));
 
       var cards = list.map(function (c) {
         var st = Store.classStats(c.id);
@@ -178,7 +161,15 @@
 
       return '' +
         '<div class="screen screen--fade">' +
-          (list.length ? achievementCard() : '') +
+          '<div class="home-head">' +
+            '<div class="home-head__row">' +
+              '<div>' +
+                '<div class="home-head__hi">' + greet + ' 👋</div>' +
+                '<div class="home-head__name">' + esc(me.nickname) + '</div>' +
+              '</div>' +
+              '<button class="home-head__avatar" data-action="open-profile">' + avatar(me.nickname) + '</button>' +
+            '</div>' +
+          '</div>' +
           '<div class="sec-title sec-title--plain">我的班级<span style="color:var(--ink-300)">' + list.length + '</span></div>' +
           (list.length ? cards :
             '<div class="empty">' +
@@ -227,6 +218,7 @@
         '<div class="tabs">' +
           '<button class="tab' + (tab === 'today' ? ' is-active' : '') + '" data-action="switch-tab" data-tab="today">今日作业<span class="tab__count">' + st.todayCount + '</span></button>' +
           '<button class="tab' + (tab === 'history' ? ' is-active' : '') + '" data-action="switch-tab" data-tab="history">历史作业</button>' +
+          '<button class="tab' + (tab === 'achv' ? ' is-active' : '') + '" data-action="switch-tab" data-tab="achv">学期成就</button>' +
         '</div>';
 
       var bodyHtml = '';
@@ -238,6 +230,8 @@
             '<div class="empty__title">今天还没有作业</div>' +
             '<div class="empty__text">' + (owner ? '点击下方「发布作业」布置今天的第一条任务' : '等待管理员发布今天的作业') + '</div>' +
           '</div>';
+      } else if (tab === 'achv') {
+        bodyHtml = achievementPanel(c.id);
       } else {
         var hist = Store.historyAssignments(c.id);
         var groups = {};
@@ -499,5 +493,5 @@
 
   global.Screens = Screens;
   global.H = { avatar: avatar, avatarText: avatarText, ic: ic, pct: pct, assignCard: assignCard, statusOf: statusOf,
-    achievementCard: achievementCard, achievementRows: achievementRows };
+    achievementRows: achievementRows };
 })(window);

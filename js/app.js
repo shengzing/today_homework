@@ -27,8 +27,6 @@
       navbar = document.getElementById('navbar');
       actionbar = document.getElementById('actionbar');
       Store.init();
-      var my = Store.myClasses();
-      this.achvClassId = my.length ? my[0].id : null;
       this.stack = Store.state.loggedIn ? [{ name: 'home', params: {} }] : [{ name: 'login', params: {} }];
       this.bind();
       this.render();
@@ -269,31 +267,6 @@
         UI.toast('已加入「' + r.klass.name + '」');
         App.resetTo('classDetail', { id: r.klass.id, tab: 'today' });
       });
-    },
-
-    /* --- 学期成就排行 --- */
-    'switch-achv-class': function () {
-      var list = Store.myClasses();
-      if (list.length <= 1) return;
-      var items = list.map(function (c) {
-        return { label: c.name, icon: 'users' };
-      });
-      var cur = list.map(function (c) { return c.id; }).indexOf(App.achvClassId);
-      UI.actionSheet({ title: '选择班级', items: items }).then(function (i) {
-        if (i === null || i === undefined) return;
-        App.achvClassId = list[i].id;
-        App.refresh();
-      });
-    },
-    'open-achv-all': function () {
-      var classId = App.achvClassId || (Store.myClasses()[0] && Store.myClasses()[0].id);
-      if (!classId) return;
-      var c = Store.klass(classId);
-      var ach = Store.achievementOf(classId);
-      var html =
-        '<div class="achv-sheet__note">每个作业按完成名次计分：第 1 名 3 分，第 2 名 2 分，其余完成者各 1 分</div>' +
-        '<div class="achv-rows">' + H.achievementRows(ach, Store.me().id) + '</div>';
-      UI.sheetHtml({ title: (c ? c.name : '') + ' · 学期成就排行', html: html });
     },
 
     /* --- 班级详情 --- */

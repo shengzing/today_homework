@@ -162,24 +162,6 @@
     }, duration || 2600);
   }
 
-  /* ---------------- 自定义内容底部弹层（可滚动） ---------------- */
-  function sheetHtml(opts) {
-    return new Promise(function (resolve) {
-      if (!modalHost) modalHost = el('modalHost');
-      modalHost.innerHTML =
-        '<div class="sheet-mask" data-dismiss="1"></div>' +
-        '<div class="sheet">' +
-        (opts.title ? '<div class="sheet__title">' + esc(opts.title) + '</div>' : '') +
-        '<div class="sheet__scroll">' + (opts.html || '') + '</div>' +
-        '<button class="sheet__item sheet__cancel" data-i="-1">关闭</button>' +
-        '</div>';
-      modalHost.classList.add('is-open');
-      function close() { modalHost.classList.remove('is-open'); modalHost.innerHTML = ''; resolve(true); }
-      modalHost.querySelector('[data-i="-1"]').addEventListener('click', close);
-      modalHost.querySelector('.sheet-mask').addEventListener('click', close);
-    });
-  }
-
   /* ---------------- ActionSheet ---------------- */
   function actionSheet(opts) {
     return new Promise(function (resolve) {
@@ -276,7 +258,7 @@
   }
 
   global.UI = {
-    toast: toast, hint: hint, sheetHtml: sheetHtml,
+    toast: toast, hint: hint,
     confirm: confirm, prompt: prompt, formDialog: formDialog, actionSheet: actionSheet,
     loading: loading, hideLoading: hideLoading,
     icon: icon, pseudoQR: pseudoQR, copy: copy, esc: esc
