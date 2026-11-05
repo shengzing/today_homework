@@ -58,7 +58,12 @@
   function fmtDayLabel(ts) {
     var d = new Date(ts), t = new Date(); t.setHours(0, 0, 0, 0);
     var diff = Math.round((new Date(d).setHours(0, 0, 0, 0) - t.getTime()) / 86400000);
-    var rel = diff === 0 ? '今天' : (diff === -1 ? '昨天' : (diff === 1 ? '明天' : fmtDate(ts)));
+    var rel = diff === 0 ? '今天'
+      : diff === -1 ? '昨天'
+      : diff === 1 ? '明天'
+      : diff === 2 ? '后天'
+      : diff === -2 ? '前天'
+      : fmtDate(ts);
     return { rel: rel, date: fmtDate(ts), week: WEEK[d.getDay()] };
   }
 
@@ -502,7 +507,8 @@
     var isEOD = d.getHours() === 23 && d.getMinutes() === 59;
     var l = fmtDayLabel(deadline);
     var time = isEOD ? '24:00' : fmtTime(deadline);
-    var label = (l.rel === '今天' || l.rel === '昨天' || l.rel === '明天') ? l.rel : fmtDate(deadline);
+    var RELATIVE = ['今天', '昨天', '明天', '后天', '前天'];
+    var label = RELATIVE.indexOf(l.rel) >= 0 ? l.rel : fmtDate(deadline);
     var over = now > deadline;
     return { text: (over ? '已于 ' : '') + label + ' ' + time + ' 截止', over: over };
   }

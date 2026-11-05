@@ -306,8 +306,10 @@
       var params = App.top().params;
       var editId = params.editId;
       var classId = params.id;
-      var deadline = params.editId ? (params.deadline === undefined ? null : params.deadline)
-                                   : (params.deadline || Store.util.endOfDay(0));
+      /* 语义：省略 = 保留原值；null = 清除；时间戳 = 设置 */
+      var deadline = params.editId
+        ? (params.deadline === undefined ? (Store.assignment(params.editId) || {}).deadline : params.deadline)
+        : (params.deadline || Store.util.endOfDay(0));
 
       UI.loading(editId ? '保存中…' : '发布中…');
       setTimeout(function () {

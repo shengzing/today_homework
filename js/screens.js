@@ -266,7 +266,10 @@
       var editing = p.editId ? Store.assignment(p.editId) : null;
       var title = editing ? editing.title : '';
       var content = editing ? editing.content : '';
-      var dl = editing ? editing.deadline : (p.deadline || Store.util.endOfDay(0));
+      /* 编辑态优先用用户当前选择（params.deadline），未选择时回落到原值 */
+      var dl = editing
+        ? (p.deadline === undefined ? editing.deadline : p.deadline)
+        : (p.deadline || Store.util.endOfDay(0));
       var label = dl ? F.deadlineText(dl, Store.now()).text.replace(' 截止', '') : '未设置';
       return '' +
         '<div class="screen screen--fade">' +
